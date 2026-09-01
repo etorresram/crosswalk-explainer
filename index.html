@@ -254,13 +254,13 @@ img{max-width:100%}
       <p class="eyebrow step">La cadena</p>
       <h2 class="step">La traducción tiene dos escalones, y los dos pierden información.</h2>
       <p class="step">A modo de ejemplo usaremos el caso de <mark class="ok">Estados
-        Unidos</mark> y el clasificador internacional de ocupaciones,
-        <mark class="ok">ISCO-08</mark>: el país con las tablas y los microdatos mejor
+        Unidos</mark> y la Clasificación Internacional Uniforme de
+        Ocupaciones (<mark class="ok">ISCO-08</mark>, por su sigla en inglés): el país con las tablas y los microdatos mejor
         documentados del mundo. Si el problema aparece aquí, donde la documentación es peor
         no es menor.</p>
-      <p class="step">La encuesta de hogares de Estados Unidos no registra la clasificación
-        internacional ni la clasificación detallada de ocupaciones. Registra
-        <mark class="ok">los códigos del Censo</mark>, que son un resumen de los otros dos.</p>
+      <p class="step">La encuesta de hogares de Estados Unidos no registra ISCO-08 ni la
+        clasificación detallada de ocupaciones. Registra
+        <mark class="ok">los códigos del Censo</mark>, que son un resumen de las otras dos.</p>
       <p class="step"><b>Escalón 1.</b> El Censo agrupa 840 ocupaciones detalladas en 538 códigos
         propios antes de publicar. Lo hace por buenas razones: proteger la identidad de los
         encuestados y evitar categorías con muy poca gente. Pero cuando el dato llega al analista,
@@ -271,7 +271,7 @@ img{max-width:100%}
     </div>
     <div class="stage">
       <svg id="chain" viewBox="0 0 460 300" aria-label="Diagrama de la cadena de clasificaciones"></svg>
-      <div class="stage-cap" data-t="cap1">Censo 2010 → clasificación detallada → clasificación internacional</div>
+      <div class="stage-cap" data-t="cap1">Censo 2010 → clasificación detallada → ISCO-08</div>
     </div>
   </section>
 
@@ -283,7 +283,8 @@ img{max-width:100%}
       <p class="step">De cada 100 trabajadores estadounidenses, <mark class="ok">51 caen en un
         código con un único destino posible</mark>. Los otros <mark>49 no</mark>: su ocupación
         puede clasificarse legítimamente de varias formas distintas.</p>
-      <p class="step">Elegí un código real y mirá en cuántas categorías internacionales puede terminar.</p>
+      <p class="step">Elegí un código real y mirá en cuántas categorías
+        de ISCO-08 puede terminar.</p>
       <div class="chips step" id="codeChips" role="group" aria-label="Códigos de ejemplo"></div>
       <p class="muted step" id="codeDesc" style="font-size:15.5px; min-height:3em"></p>
     </div>
@@ -303,7 +304,7 @@ img{max-width:100%}
         respuesta es sí, la culpa es de la agregación doméstica. Si es no, del desajuste entre
         clasificaciones. No hace falta ninguna elección arbitraria.</p>
       <p class="step">Lo llamativo es el <mark>16,1%</mark>: ese empleo es ambiguo
-        <b>no</b> por la clasificación internacional, sino porque la propia oficina estadística
+        <b>no</b> por ISCO-08, sino porque la propia oficina estadística
         agrupó ocupaciones antes de publicar sus datos.</p>
       <p class="note step">Ese detalle perdido lo hereda cualquier traducción hecha desde
         microdatos públicos, sea cual sea la clasificación de destino.</p>
@@ -426,7 +427,7 @@ img{max-width:100%}
         <div class="tile">
           <div class="tile-v">1 de 3</div>
           <div class="tile-k" data-t="t2k">Origen doméstico</div>
-          <div class="tile-d" data-t="t2d">No lo causa la clasificación internacional.</div>
+          <div class="tile-d" data-t="t2d">No lo causa ISCO-08.</div>
         </div>
         <div class="tile">
           <div class="tile-v">1,74&thinsp;×</div>
@@ -465,7 +466,7 @@ img{max-width:100%}
       desc:"Puede terminar en 18 categorías distintas: desde ingenieros navales y controladores aéreos hasta conductores de autobús y recolectores de residuos. Extremos opuestos de la escala salarial.",
       dest:["Ingenieros navales","Oficiales de cubierta","Pilotos","Controladores aéreos","Inspectores de salud","Auxiliares de vuelo","Conductores de tren","Playeros","Maquinistas","Señaleros","Motociclistas","Taxistas","Conductores de autobús","Camioneros","Gruistas","Autoelevadores","Estibadores","Recolectores"] },
     { id:"6050", n:14, name:"Trabajadores agrícolas varios",
-      desc:"Mezcla agricultores calificados con peones. La clasificación internacional los separa en grupos distintos, y ninguna asignación puede partir el código en dos.",
+      desc:"Mezcla agricultores calificados con peones. ISCO-08 los separa en grupos distintos, y ninguna asignación puede partir el código en dos.",
       dest:["Agricultores","Horticultores","Jardineros","Ganaderos","Avicultores","Apicultores","Mixtos","Pescadores","Cazadores","Peones agrícolas","Peones forestales","Peones pesqueros","Recolectores","Operarios"] },
     { id:"4250", n:5, name:"Mantenimiento de espacios verdes",
       desc:"Cinco destinos posibles, repartidos entre jardinería calificada, oficios de construcción y limpieza elemental.",
@@ -502,11 +503,11 @@ img{max-width:100%}
   var NARR = [
     "Imaginemos que dos países quieren comparar cuántos técnicos tiene cada uno. El problema es que cada país anota los oficios con su propio catálogo de códigos, y esos catálogos no coinciden. Para poder comparar, hay que traducir de un catálogo al otro. Esa traducción se hace con tablas oficiales, publicadas por los organismos de estadística. Hasta acá, todo razonable. El detalle que casi nadie mira es que esas tablas no son de una a una. Un mismo código nacional suele aparecer enfrentado a varias categorías internacionales, y la tabla no dice cuál corresponde. Entonces decide una persona: quien está procesando los datos. Elige una, sigue trabajando, y esa elección casi nunca llega al lector: cuando se anota, queda en un apéndice o dentro del código.",
 
-    "A modo de ejemplo usaremos el caso de Estados Unidos y su traducción al clasificador internacional de ocupaciones: es el país con las tablas y los microdatos mejor documentados del mundo. Veamos por qué el problema se agranda. La traducción no es un salto, son dos escalones. Primer escalón: la encuesta de hogares no publica la clasificación detallada de ocupaciones, que tiene ochocientas cuarenta categorías. Publica un resumen propio de quinientas treinta y ocho códigos, porque agrupar protege la confidencialidad de los encuestados y evita categorías con muy poca gente. Es una decisión sensata, pero tiene un costo: el detalle fino ya está perdido cuando el dato llega al analista. Segundo escalón: la tabla que lleva de la clasificación detallada a la internacional es de muchos a muchos. De las ochocientas cuarenta ocupaciones detalladas, ciento cincuenta y cuatro tienen más de un destino posible. Al encadenar los dos escalones, la ambigüedad no se suma: se multiplica.",
+    "A modo de ejemplo usaremos el caso de Estados Unidos y su traducción a la Clasificación Internacional Uniforme de Ocupaciones, conocida como ISCO: es el país con las tablas y los microdatos mejor documentados del mundo. Veamos por qué el problema se agranda. La traducción no es un salto, son dos escalones. Primer escalón: la encuesta de hogares no publica la clasificación detallada de ocupaciones, que tiene ochocientas cuarenta categorías. Publica un resumen propio de quinientas treinta y ocho códigos, porque agrupar protege la confidencialidad de los encuestados y evita categorías con muy poca gente. Es una decisión sensata, pero tiene un costo: el detalle fino ya está perdido cuando el dato llega al analista. Segundo escalón: la tabla que lleva de la clasificación detallada a ISCO es de muchos a muchos. De las ochocientas cuarenta ocupaciones detalladas, ciento cincuenta y cuatro tienen más de un destino posible. Al encadenar los dos escalones, la ambigüedad no se suma: se multiplica.",
 
-    "El primer hallazgo del estudio es simplemente el tamaño del problema. De cada cien trabajadores estadounidenses, cincuenta y uno están en un código que tiene un único destino posible: para ellos la traducción es automática y no hay nada que decidir. Los otros cuarenta y nueve, no. Su ocupación puede clasificarse de varias maneras, todas igualmente válidas según la tabla oficial. El caso más extremo es el código de supervisores de transporte. Ese único código puede terminar en dieciocho categorías internacionales distintas: desde ingenieros navales y controladores aéreos, que están en la parte alta de la escala salarial, hasta recolectores de residuos, que están en la parte baja. No son categorías vecinas que se discuten en el borde: son extremos opuestos.",
+    "El primer hallazgo del estudio es simplemente el tamaño del problema. De cada cien trabajadores estadounidenses, cincuenta y uno están en un código que tiene un único destino posible: para ellos la traducción es automática y no hay nada que decidir. Los otros cuarenta y nueve, no. Su ocupación puede clasificarse de varias maneras, todas igualmente válidas según la tabla oficial. El caso más extremo es el código de supervisores de transporte. Ese único código puede terminar en dieciocho categorías distintas de ISCO: desde ingenieros navales y controladores aéreos, que están en la parte alta de la escala salarial, hasta recolectores de residuos, que están en la parte baja. No son categorías vecinas que se discuten en el borde: son extremos opuestos.",
 
-    "El segundo hallazgo responde de dónde viene la ambigüedad, y tiene una sorpresa. Se puede repartir sin ninguna elección arbitraria, preguntando algo simple para cada código: si tuviéramos el detalle fino que la oficina censal agrupó, ¿se resolvería la duda? Cuando la respuesta es sí, la ambigüedad la creó la agregación doméstica. Cuando es no, la creó el desajuste entre las dos clasificaciones. El resultado es que un dieciséis por ciento del empleo es ambiguo por la agregación propia del país, no por la clasificación internacional. Es decir: un tercio del problema no tiene nada que ver con comparar países. Está adentro del dato antes de que ninguna clasificación internacional entre en escena, y lo hereda cualquier traducción hecha desde microdatos públicos.",
+    "El segundo hallazgo responde de dónde viene la ambigüedad, y tiene una sorpresa. Se puede repartir sin ninguna elección arbitraria, preguntando algo simple para cada código: si tuviéramos el detalle fino que la oficina censal agrupó, ¿se resolvería la duda? Cuando la respuesta es sí, la ambigüedad la creó la agregación doméstica. Cuando es no, la creó el desajuste entre las dos clasificaciones. El resultado es que un dieciséis por ciento del empleo es ambiguo por la agregación propia del país, no por ISCO. Es decir: un tercio del problema no tiene nada que ver con comparar países. Está adentro del dato antes de que ninguna clasificación internacional entre en escena, y lo hereda cualquier traducción hecha desde microdatos públicos.",
 
     "El tercer hallazgo es el que más importa para quien usa estas estadísticas. Todo estudio serio reporta un margen de error, el que viene de haber encuestado una muestra y no a toda la población. Casi ninguno reporta el otro margen, el que viene de haber elegido una traducción entre varias posibles. El estudio los mide a los dos y los compara, moviendo el nivel de detalle de la clasificación. Y aparece algo que va contra la intuición: al agrupar categorías, el margen de muestreo baja, porque cada grupo tiene más gente adentro. Pero el margen por traducción sube, porque mover un código entre grupos grandes lo desplaza mucho más lejos en la escala salarial. Los dos se cruzan. Y en el nivel de detalle que usa la mayoría de las comparaciones entre países, el margen por traducción es casi el doble que el de muestreo.",
 
@@ -529,7 +530,7 @@ img{max-width:100%}
       desc:"It can end up in 18 different categories: from ship engineers and air traffic controllers to bus drivers and refuse collectors. Opposite ends of the wage scale.",
       dest:["Ship engineers","Deck officers","Pilots","Air traffic control","Health inspectors","Flight attendants","Train drivers","Fuel attendants","Locomotive operators","Signallers","Motorcycle couriers","Taxi drivers","Bus drivers","Truck drivers","Crane operators","Forklift operators","Dockers","Refuse collectors"] },
     { id:"6050", n:14, name:"Miscellaneous agricultural workers",
-      desc:"It mixes skilled farmers with farmhands. The international classification splits them into separate groups, and no assignment can cut the code in two.",
+      desc:"It mixes skilled farmers with farmhands. ISCO-08 splits them into separate groups, and no assignment can cut the code in two.",
       dest:["Crop farmers","Gardeners","Groundskeepers","Livestock farmers","Poultry producers","Beekeepers","Mixed farmers","Fishery workers","Hunters","Farm labourers","Forestry labourers","Fishery labourers","Gatherers","Machine operators"] },
     { id:"4250", n:5, name:"Grounds maintenance workers",
       desc:"Five possible destinations, split across skilled gardening, building trades and elementary cleaning.",
@@ -566,11 +567,11 @@ img{max-width:100%}
   var NARR_EN = [
     "Suppose two countries want to compare how many technicians each of them has. The trouble is that every country records jobs with its own catalogue of codes, and those catalogues do not match. To compare them, you have to translate from one catalogue into the other. That translation is done with official tables, published by statistical agencies. So far, all reasonable. The detail almost nobody looks at is that those tables are not one to one. A single national code is often set against several international categories, and the table does not say which one applies. So a person decides: whoever is processing the data. They pick one, carry on working, and that choice rarely reaches the reader: when it is written down, it sits in an appendix or inside the code.",
 
-    "As a working example we will use the United States and its translation into the international occupational classifier: the country with the best documented tables and microdata in the world. Let us see why the problem grows. The translation is not one jump, it is two steps. First step: the household survey does not publish the detailed occupation classification, which has eight hundred and forty categories. It publishes a summary of its own, five hundred and thirty eight codes, because pooling protects the confidentiality of respondents and avoids categories with very few people. It is a sensible decision, but it has a cost: the fine detail is already lost by the time the data reaches the analyst. Second step: the table running from the detailed classification to the international one is many to many. Of the eight hundred and forty detailed occupations, one hundred and fifty four have more than one possible destination. Chaining the two steps, ambiguity does not add up: it multiplies.",
+    "As a working example we will use the United States and its translation into the International Standard Classification of Occupations, known as ISCO: the country with the best documented tables and microdata in the world. Let us see why the problem grows. The translation is not one jump, it is two steps. First step: the household survey does not publish the detailed occupation classification, which has eight hundred and forty categories. It publishes a summary of its own, five hundred and thirty eight codes, because pooling protects the confidentiality of respondents and avoids categories with very few people. It is a sensible decision, but it has a cost: the fine detail is already lost by the time the data reaches the analyst. Second step: the table running from the detailed classification to ISCO is many to many. Of the eight hundred and forty detailed occupations, one hundred and fifty four have more than one possible destination. Chaining the two steps, ambiguity does not add up: it multiplies.",
 
-    "The first finding of the study is simply the size of the problem. Out of every hundred American workers, fifty one are in a code with a single possible destination: for them the translation is automatic and there is nothing to decide. The other forty nine are not. Their occupation can be classified in several ways, all equally valid according to the official table. The most extreme case is the code for transportation supervisors. That single code can end up in eighteen different international categories: from ship engineers and air traffic controllers, who sit at the top of the wage scale, down to refuse collectors, who sit at the bottom. These are not neighbouring categories argued over at the margin: they are opposite extremes.",
+    "The first finding of the study is simply the size of the problem. Out of every hundred American workers, fifty one are in a code with a single possible destination: for them the translation is automatic and there is nothing to decide. The other forty nine are not. Their occupation can be classified in several ways, all equally valid according to the official table. The most extreme case is the code for transportation supervisors. That single code can end up in eighteen different ISCO categories: from ship engineers and air traffic controllers, who sit at the top of the wage scale, down to refuse collectors, who sit at the bottom. These are not neighbouring categories argued over at the margin: they are opposite extremes.",
 
-    "The second finding answers where the ambiguity comes from, and it holds a surprise. It can be split without any arbitrary choice, by asking something simple for each code: if we had the fine detail the census office pooled, would the doubt be resolved? When the answer is yes, domestic aggregation created the ambiguity. When it is no, the mismatch between the two classifications did. The result is that sixteen per cent of employment is ambiguous because of the country's own aggregation, not because of the international classification. In other words: a third of the problem has nothing to do with comparing countries. It is inside the data before any international classification enters the scene, and it is inherited by any translation built from public microdata.",
+    "The second finding answers where the ambiguity comes from, and it holds a surprise. It can be split without any arbitrary choice, by asking something simple for each code: if we had the fine detail the census office pooled, would the doubt be resolved? When the answer is yes, domestic aggregation created the ambiguity. When it is no, the mismatch between the two classifications did. The result is that sixteen per cent of employment is ambiguous because of the country's own aggregation, not because of ISCO. In other words: a third of the problem has nothing to do with comparing countries. It is inside the data before any international classification enters the scene, and it is inherited by any translation built from public microdata.",
 
     "The third finding matters most to whoever uses these statistics. Every serious study reports a margin of error, the one that comes from having surveyed a sample rather than the whole population. Almost none reports the other margin, the one that comes from having picked one translation among several. The study measures both and compares them, moving the level of detail of the classification. And something counterintuitive appears: pooling categories makes the sampling margin fall, because each group holds more people. But the translation margin rises, because moving a code between large groups displaces it much further along the wage scale. The two cross. And at the level of detail most cross-country comparisons use, the translation margin is almost twice the sampling one.",
 
@@ -600,13 +601,13 @@ img{max-width:100%}
 `<p class="eyebrow step">The chain</p>
       <h2 class="step">The translation has two links, and both lose information.</h2>
       <p class="step">As a working example we will use <mark class="ok">the United
-        States</mark> and the international occupational classifier,
-        <mark class="ok">ISCO-08</mark>: the country with the best documented tables and
+        States</mark> and the International Standard Classification of
+        Occupations (<mark class="ok">ISCO-08</mark>): the country with the best documented tables and
         microdata in the world. If the problem shows up here, it is no smaller where
         documentation is worse.</p>
-      <p class="step">The US household survey records neither the international classification
-        nor the detailed occupation list. It records <mark class="ok">the Census codes</mark>,
-        which are a summary of the other two.</p>
+      <p class="step">The US household survey records neither ISCO-08 nor the detailed
+        occupation list. It records <mark class="ok">the Census codes</mark>, which are a
+        summary of the other two.</p>
       <p class="step"><b>Link 1.</b> The Census pools 840 detailed occupations into 538 codes of
         its own before publishing. It does so for good reasons: protecting respondents'
         confidentiality and avoiding categories with very few people. But by the time the data
@@ -621,8 +622,8 @@ img{max-width:100%}
       <p class="step">Out of every 100 US workers, <mark class="ok">51 fall in a code with a
         single possible destination</mark>. The other <mark>49 do not</mark>: their occupation
         can legitimately be classified in several different ways.</p>
-      <p class="step">Pick a real code and see how many international categories it can end up
-        in.</p>
+      <p class="step">Pick a real code and see how many ISCO-08 categories it can end
+        up in.</p>
       <div class="chips step" id="codeChips" role="group" aria-label="Sample codes"></div>
       <p class="muted step" id="codeDesc" style="font-size:15.5px; min-height:3.4em"></p>`,
 
@@ -633,7 +634,7 @@ img{max-width:100%}
         domestic aggregation is to blame. If no, the mismatch between classifications is. No
         arbitrary choice is needed.</p>
       <p class="step">The striking figure is <mark>16.1%</mark>: that employment is ambiguous
-        <b>not</b> because of the international classification, but because the statistical
+        <b>not</b> because of ISCO-08, but because the statistical
         office itself pooled occupations before publishing its data.</p>
       <p class="note step">That lost detail is inherited by any translation built from public
         microdata, whatever the target classification.</p>`,
@@ -713,7 +714,7 @@ img{max-width:100%}
          vGood:" · voz de red, buena calidad", vBasic:" · voz compacta del sistema",
          vHint:" · clic para alternar entre las dos mejores del sistema",
          dest1:"DESTINO", destN:"DESTINOS", cOcc:"ocupaciones detalladas",
-         cCen:"códigos del Censo", cInt:"categorías internacionales",
+         cCen:"códigos del Censo", cInt:"categorías de ISCO-08",
          dig1:" dígito", digN:" díg.", okFit:"cuadra", codeCap:"Código ",
          docTitle:"Un código, muchos destinos" },
     en:{ btn:"🇪🇸 Español", voice:"Voice",
@@ -723,12 +724,12 @@ img{max-width:100%}
          vGood:" · network voice, good quality", vBasic:" · compact system voice",
          vHint:" · click to switch between the system's two best",
          dest1:"DESTINATION", destN:"DESTINATIONS", cOcc:"detailed occupations",
-         cCen:"Census codes", cInt:"international categories",
+         cCen:"Census codes", cInt:"ISCO-08 categories",
          dig1:" digit", digN:" dig.", okFit:"matches", codeCap:"Code ",
          docTitle:"One code, many destinations",
          brand:'One code, <span>many destinations</span>',
          cap0:"Census code 9000 · Transportation supervisors",
-         cap1:"2010 Census → detailed classification → international classification",
+         cap1:"2010 Census → detailed classification → ISCO-08",
          lgOk:'<i style="background:var(--resolved)"></i>Unambiguous',
          lgAmb:'<i style="background:var(--ambiguous)"></i>Ambiguous',
          cap3:"Share of employment, by origin of the ambiguity",
@@ -739,7 +740,7 @@ img{max-width:100%}
          cap6:"Each code's contribution to the total range, in order",
          cap7:"The four numbers of the study",
          t1k:"Ambiguous employment", t1d:"Admits more than one international destination.",
-         t2k:"Domestic origin", t2d:"Not caused by the international classification.",
+         t2k:"Domestic origin", t2d:"Not caused by ISCO-08.",
          t3k:"Versus chance", t3d:"Weighs more than the sampling margin of error.",
          t4k:"Power of the check", t4d:"Matching the totals pins down just 2 codes of 89.",
          foot1:"<b>Lost in Harmonization</b> · Working paper, 2026",
