@@ -218,7 +218,6 @@ img{max-width:100%}
     <div class="brand" data-t="brand">Un código, <span>muchos destinos</span></div>
     <div class="ctrl">
       <button id="lang" title="English / Español">🇬🇧 English</button>
-      <button id="narrate" aria-pressed="false" title="Narración por voz">🔊 Narrar</button>
       <button id="voice" title="Cambiar de voz">Voz</button>
       <button id="rate" title="Velocidad de la voz">Velocidad: lenta</button>
       <button id="auto" aria-pressed="false" title="Avance automático">▶ Reproducir</button>
@@ -694,10 +693,9 @@ img{max-width:100%}
 
   /* Etiquetas sueltas: controles, pies de figura, leyendas y fichas. */
   var TXT = {
-    es:{ btn:"🇬🇧 English", narrate:"🔊 Narrar", narrating:"🔊 Narrando", voice:"Voz",
+    es:{ btn:"🇬🇧 English", voice:"Voz",
          speed:"Velocidad: ", rates:["lenta","normal","rápida"], play:"▶ Reproducir",
-         pause:"❚❚ Pausar", of:" de ", scene:"Escena ", scenes:"Escenas",
-         tNarr:"Narración por voz", tVoice:"Cambiar de voz", tRate:"Velocidad de la voz",
+         pause:"❚❚ Pausar", of:" de ", scene:"Escena ", scenes:"Escenas", tVoice:"Cambiar de voz", tRate:"Velocidad de la voz",
          tAuto:"Avance automático", tPrev:"Anterior", tNext:"Siguiente",
          vGood:" · voz de red, buena calidad", vBasic:" · voz compacta del sistema",
          vHint:" · clic para alternar entre las dos mejores del sistema",
@@ -705,10 +703,9 @@ img{max-width:100%}
          cCen:"códigos del Censo", cInt:"categorías internacionales",
          dig1:" dígito", digN:" díg.", okFit:"cuadra", codeCap:"Código ",
          docTitle:"Un código, muchos destinos" },
-    en:{ btn:"🇪🇸 Español", narrate:"🔊 Narrate", narrating:"🔊 Narrating", voice:"Voice",
+    en:{ btn:"🇪🇸 Español", voice:"Voice",
          speed:"Speed: ", rates:["slow","normal","fast"], play:"▶ Play",
-         pause:"❚❚ Pause", of:" of ", scene:"Scene ", scenes:"Scenes",
-         tNarr:"Voice narration", tVoice:"Change voice", tRate:"Voice speed",
+         pause:"❚❚ Pause", of:" of ", scene:"Scene ", scenes:"Scenes", tVoice:"Change voice", tRate:"Voice speed",
          tAuto:"Auto-advance", tPrev:"Previous", tNext:"Next",
          vGood:" · network voice, good quality", vBasic:" · compact system voice",
          vHint:" · click to switch between the system's two best",
@@ -837,9 +834,12 @@ img{max-width:100%}
   });
 
   /* ---------------- voz ---------------- */
+  /* La narracion no tiene interruptor propio: nadie quiere el avance sin voz
+     ni la voz sin avance. narrateOn sigue existiendo porque marca la
+     diferencia entre reproducir (ritmo atado al habla) y navegar a mano
+     (silencio y ritmo fijo), pero ahora lo gobierna Reproducir. */
   var narrateOn = false, autoOn = false, synth = window.speechSynthesis;
-  var nb = document.getElementById("narrate"), ab = document.getElementById("auto");
-  if (!synth){ nb.disabled = true; nb.textContent = "🔇 Sin voz"; }
+  var ab = document.getElementById("auto");
 
   /* La Web Speech API no expone el genero de la voz, asi que se reconoce por
      nombre: estos son los nombres masculinos que sirven los sistemas mas usados
@@ -956,15 +956,6 @@ img{max-width:100%}
     }
     setTimeout(nextPart, 140);   // deja que cancel() termine de vaciar la cola
   }
-  nb.addEventListener("click", function(){
-    narrateOn = !narrateOn;
-    nb.setAttribute("aria-pressed", String(narrateOn));
-    nb.textContent = narrateOn ? tr("narrating") : tr("narrate");
-    if (narrateOn) speak(NARR[cur]);
-    else { gen++; if (synth) synth.cancel(); }
-    if (autoOn) queueNext();     // el reloj se recalcula para el modo nuevo
-  });
-
   /* Reloj de seguridad: si la voz falla, se corta o el navegador nunca emite
      onend (pasa en Chrome con utterances largas), la escena avanza igual. */
   function queueNext(){
@@ -974,17 +965,21 @@ img{max-width:100%}
     autoTimer = setTimeout(function(){ advanceFrom(sceneIx); }, ms);
   }
   function stopAuto(){
-    autoOn = false; clearTimeout(autoTimer);
+    autoOn = false; narrateOn = false;
+    gen++; if (synth) synth.cancel();
+    clearTimeout(autoTimer);
     ab.setAttribute("aria-pressed","false"); ab.textContent = tr("play");
   }
   ab.addEventListener("click", function(){
-    autoOn = !autoOn;
-    ab.setAttribute("aria-pressed", String(autoOn));
-    ab.textContent = autoOn ? tr("pause") : tr("play");
-    if (autoOn){
-      if (cur === scenes.length - 1){ go(0); }
-      else { advanceGuard = -1; if (narrateOn) speak(NARR[cur]); queueNext(); }
-    } else { clearTimeout(autoTimer); if (synth) synth.cancel(); }
+    /* Parar es siempre stopAuto: alli vive el gen++ que invalida la cadena de
+       voz en curso. Duplicar la parada aqui dejaba hablando a la escena. */
+    if (autoOn){ stopAuto(); return; }
+    autoOn = true;
+    narrateOn = !!synth;
+    ab.setAttribute("aria-pressed", "true");
+    ab.textContent = tr("pause");
+    if (cur === scenes.length - 1){ go(0); }
+    else { advanceGuard = -1; if (narrateOn) speak(NARR[cur]); queueNext(); }
   });
 
   /* ---------------- dibujo ---------------- */
@@ -1249,8 +1244,6 @@ img{max-width:100%}
     tagged.forEach(function(e){ e.innerHTML = tr(e.getAttribute("data-t")); });
     buildChips(); bindDial();
     lb.textContent = tr("btn");
-    nb.textContent = narrateOn ? tr("narrating") : tr("narrate");
-    nb.title = tr("tNarr");
     vb.title = tr("tVoice");
     rb.textContent = tr("speed") + tr("rates")[rateIx]; rb.title = tr("tRate");
     ab.textContent = autoOn ? tr("pause") : tr("play");
