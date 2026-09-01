@@ -21,7 +21,7 @@ Unidos de 2019 y las tablas oficiales de correspondencia:
 | Empleo con más de un destino admisible | 48,8 % |
 | Ambigüedad de origen doméstico, no internacional | 16,1 % |
 | Incertidumbre de definición frente a la muestral, a 2 dígitos | 1,74× |
-| Códigos que se fijan al exigir que cuadren los totales publicados | 0 de 89 |
+| Códigos que se fijan al exigir que cuadren los totales publicados | 2 de 89, y 0 con holgura mínima |
 
 ## Cómo está hecho
 
