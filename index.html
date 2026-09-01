@@ -769,9 +769,16 @@ img{max-width:100%}
       // dibujar antes de mostrar, para que la escena no entre a medio construir
       try{ DRAW[i] && DRAW[i](); }
       catch(err){ console.error('escena ' + i + ':', err); }
-      requestAnimationFrame(function(){
-        requestAnimationFrame(function(){ sc.setAttribute("data-vis", "1"); });
-      });
+      /* Dos rAF encadenados dejan que el navegador aplique el estado inicial
+         antes de arrancar la transicion. Pero en una pestaña de fondo rAF no
+         corre, y sin respaldo la escena se quedaria invisible hasta que
+         alguien mire la pestaña. El temporizador es mas lento a proposito:
+         en primer plano gana rAF y la transicion se ve. */
+      var mostrado = false;
+      function mostrar(){ if (mostrado) return; mostrado = true;
+        sc.setAttribute("data-vis", "1"); }
+      requestAnimationFrame(function(){ requestAnimationFrame(mostrar); });
+      setTimeout(mostrar, 500);
       revealSteps(sc);
       if (narrateOn) speak(NARR[i]);
       if (autoOn) queueNext();
