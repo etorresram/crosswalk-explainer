@@ -1,0 +1,1242 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="author" content="Eric Torres Ramírez">
+<meta name="description" content="Explicador interactivo y bilingüe sobre la incertidumbre de definición en los crosswalks ocupacionales: casi la mitad del empleo estadounidense admite más de un destino en la clasificación internacional.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Un código, muchos destinos">
+<meta property="og:description" content="Explicador interactivo y bilingüe sobre la incertidumbre de definición en los crosswalks ocupacionales: casi la mitad del empleo estadounidense admite más de un destino en la clasificación internacional.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='18' fill='%23121513'/%3E%3Cpath d='M28 50h44M50 50L34 30M50 50l16-20M50 50L34 70M50 50l16 20' stroke='%239085e9' stroke-width='7' stroke-linecap='round' fill='none'/%3E%3C/svg%3E">
+<title>Un código, muchos destinos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..125,400..800&family=Source+Serif+4:opsz,wght@8..60,400..600&family=JetBrains+Mono:wght@400;600&display=swap">
+
+<style>
+/* Diseno comprometido con un solo mundo visual: fondo oscuro para todos los
+   lectores, sea cual sea el tema de su sistema. Por eso no hay media query ni
+   data-theme; cada color se pinta explicitamente desde estos tokens. */
+:root{
+  color-scheme: dark;
+  --paper:#121513; --panel:#1B1F1C;
+  --ink:#ECEDE7; --muted:#959D92;
+  --rule:#2E342D; --rule-soft:#232823;
+  /* Dos acentos semanticos: aqua = codigo con destino unico, violeta = codigo
+     ambiguo. El violeta lee como indeterminacion, no como alarma, que es lo
+     que el contenido pide. Par validado en fondo oscuro: separacion 17,3 bajo
+     deuteranopia y 24,6 en vision normal. */
+  --resolved:#199e70; --ambiguous:#9085e9;
+  --resolved-wash:rgba(25,158,112,.20); --ambiguous-wash:rgba(144,133,233,.22);
+  --on-accent:#12140F;
+  --shadow:0 1px 2px rgba(0,0,0,.5), 0 14px 40px rgba(0,0,0,.42);
+  --display:"Archivo","Helvetica Neue",Arial,sans-serif;
+  --body:"Source Serif 4",Georgia,"Times New Roman",serif;
+  --mono:"JetBrains Mono",ui-monospace,"SF Mono",Menlo,monospace;
+}
+
+*{box-sizing:border-box}
+body{
+  background:var(--paper);
+  background-image:radial-gradient(120% 62% at 50% -12%, #1A1E22 0%, var(--paper) 62%);
+  background-attachment:fixed;
+  color:var(--ink);
+  font-family:var(--body); font-size:17px; line-height:1.6;
+  margin:0; -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:1120px; margin:0 auto; padding:clamp(16px,3vw,32px);
+  min-height:100vh; display:flex; flex-direction:column; gap:clamp(14px,2vw,22px)}
+
+/* ---------- topbar ---------- */
+.topbar{display:flex; align-items:center; gap:14px; flex-wrap:wrap;
+  padding-bottom:12px; border-bottom:1px solid var(--rule)}
+.brand{font-family:var(--display); font-weight:800; font-stretch:112%;
+  font-size:15px; letter-spacing:-.01em; margin-right:auto}
+.brand span{color:var(--ambiguous)}
+.ctrl{display:flex; gap:8px; align-items:center}
+button{font-family:var(--display); font-size:13px; font-weight:600;
+  color:var(--ink); background:var(--panel); border:1px solid var(--rule);
+  border-radius:7px; padding:7px 13px; cursor:pointer; line-height:1.2;
+  transition:border-color .18s, background .18s, transform .12s}
+button:hover{border-color:var(--muted)}
+button:active{transform:translateY(1px)}
+button:focus-visible{outline:2px solid var(--ambiguous); outline-offset:2px}
+button[aria-pressed="true"]{background:var(--ambiguous); border-color:var(--ambiguous);
+  color:var(--on-accent)}
+button:disabled{opacity:.38; cursor:not-allowed}
+
+/* ---------- progress rail ---------- */
+.rail{display:flex; gap:5px; align-items:center}
+.rail b{height:4px; flex:1; background:var(--rule-soft); border-radius:2px;
+  cursor:pointer; border:0; padding:0; min-width:16px; transition:background .3s}
+.rail b[data-on="1"]{background:var(--ink)}
+.rail b:focus-visible{outline:2px solid var(--ambiguous); outline-offset:3px}
+
+/* ---------- scene ---------- */
+.scene{display:none; gap:clamp(20px,3.2vw,42px); align-items:start;
+  grid-template-columns:minmax(0,1fr) minmax(0,1.05fr); flex:1;
+  opacity:0; transform:translateY(6px);
+  transition:opacity .4s ease, transform .4s cubic-bezier(.22,.9,.3,1)}
+.scene[data-live="1"]{display:grid}
+.scene[data-vis="1"]{opacity:1; transform:none}
+@media (max-width:820px){ .scene[data-live="1"]{grid-template-columns:1fr} }
+
+.eyebrow{font-family:var(--display); font-size:11px; font-weight:700;
+  letter-spacing:.14em; text-transform:uppercase; color:var(--muted); margin:0 0 10px}
+h1{font-family:var(--display); font-weight:800; font-stretch:112%;
+  font-size:clamp(30px,4.6vw,52px); line-height:1.03; letter-spacing:-.025em;
+  margin:0 0 16px; text-wrap:balance}
+h2{font-family:var(--display); font-weight:700; font-stretch:108%;
+  font-size:clamp(23px,3.1vw,34px); line-height:1.1; letter-spacing:-.02em;
+  margin:0 0 14px; text-wrap:balance}
+p{margin:0 0 14px; max-width:62ch}
+.lede{font-size:19px}
+.muted{color:var(--muted)}
+mark{background:var(--ambiguous-wash); color:inherit; padding:.05em .25em; border-radius:3px}
+mark.ok{background:var(--resolved-wash)}
+code{font-family:var(--mono); font-size:.88em; background:var(--rule-soft);
+  padding:.1em .34em; border-radius:4px}
+
+/* staged reveal */
+.step{opacity:0; transform:translateY(9px); transition:opacity .5s ease, transform .5s ease}
+.step[data-in="1"]{opacity:1; transform:none}
+
+/* ---------- stage ---------- */
+.stage{background:var(--panel); border:1px solid var(--rule); border-radius:13px;
+  padding:clamp(14px,2vw,20px); box-shadow:var(--shadow); overflow:hidden}
+.stage svg{display:block; width:100%; height:auto}
+.stage-cap{font-family:var(--display); font-size:11.5px; font-weight:600;
+  color:var(--muted); letter-spacing:.03em; margin-top:10px}
+
+.hero-num{font-family:var(--display); font-weight:800; font-stretch:120%;
+  font-size:clamp(62px,12vw,124px); line-height:.86; letter-spacing:-.045em;
+  color:var(--ambiguous); font-variant-numeric:tabular-nums}
+.hero-sub{font-family:var(--display); font-weight:700; font-size:14px;
+  letter-spacing:.1em; text-transform:uppercase; color:var(--muted)}
+
+/* code chips */
+.chips{display:flex; flex-wrap:wrap; gap:7px; margin:0 0 14px}
+.chip{font-family:var(--mono); font-size:12.5px; font-weight:600;
+  padding:6px 11px; border-radius:20px; border:1px solid var(--rule);
+  background:transparent; color:var(--ink)}
+.chip[aria-pressed="true"]{background:var(--ink); border-color:var(--ink); color:var(--paper)}
+
+/* bars */
+.bars{display:flex; flex-direction:column; gap:11px; margin:6px 0 4px}
+.bar-row{display:grid; grid-template-columns:1fr auto; gap:10px; align-items:baseline}
+.bar-lab{font-family:var(--display); font-size:13px; font-weight:600}
+.bar-val{font-family:var(--mono); font-size:13px; font-variant-numeric:tabular-nums; color:var(--muted)}
+.bar-track{grid-column:1/-1; height:9px; background:var(--rule-soft); border-radius:5px; overflow:hidden}
+.bar-fill{height:100%; width:0; border-radius:5px; transition:width .9s cubic-bezier(.22,.9,.3,1)}
+
+/* dial */
+.dial{display:flex; flex-direction:column; gap:9px; margin:14px 0 0}
+input[type=range]{width:100%; accent-color:var(--ambiguous)}
+input[type=range]:focus-visible{outline:2px solid var(--ambiguous); outline-offset:4px}
+.dial-marks{display:flex; justify-content:space-between; font-family:var(--mono);
+  font-size:11.5px; color:var(--muted)}
+.readout{display:flex; gap:clamp(12px,3vw,30px); flex-wrap:wrap; margin-top:6px}
+.metric{min-width:96px}
+.metric-k{font-family:var(--display); font-size:10.5px; font-weight:700;
+  letter-spacing:.1em; text-transform:uppercase; color:var(--muted)}
+.metric-v{font-family:var(--display); font-weight:800; font-size:26px;
+  font-variant-numeric:tabular-nums; letter-spacing:-.02em}
+
+.legend{display:flex; gap:16px; flex-wrap:wrap; font-family:var(--display);
+  font-size:12px; font-weight:600; color:var(--muted); margin-top:10px}
+.legend i{display:inline-block; width:11px; height:11px; border-radius:3px;
+  margin-right:6px; vertical-align:-1px}
+
+.note{border-left:3px solid var(--ambiguous); padding:2px 0 2px 14px;
+  font-size:16px; color:var(--muted); margin:16px 0 0; max-width:58ch}
+
+/* fichas de cierre */
+.tiles{display:grid; grid-template-columns:1fr 1fr; gap:1px;
+  background:var(--rule); border:1px solid var(--rule); border-radius:10px; overflow:hidden}
+.tile{background:var(--panel); padding:clamp(13px,2vw,20px)}
+.tile-v{font-family:var(--display); font-weight:800; font-stretch:114%;
+  font-size:clamp(29px,4.6vw,42px); line-height:1; letter-spacing:-.03em;
+  font-variant-numeric:tabular-nums; color:var(--ambiguous)}
+.tile-v.ok{color:var(--resolved)}
+.tile-k{font-family:var(--display); font-size:11px; font-weight:700;
+  letter-spacing:.09em; text-transform:uppercase; color:var(--muted); margin-top:7px}
+.tile-d{font-size:14px; line-height:1.45; color:var(--ink); margin-top:6px}
+.closer{font-family:var(--display); font-weight:700; font-stretch:106%;
+  font-size:clamp(17px,2.3vw,21px); line-height:1.28; letter-spacing:-.012em;
+  margin:18px 0 0; text-wrap:balance; max-width:52ch}
+
+.foot{border-top:1px solid var(--rule); padding-top:12px; font-size:13px;
+  color:var(--muted); display:flex; gap:14px; flex-wrap:wrap; align-items:center}
+.foot .sp{margin-left:auto}
+.foot .author{color:var(--ink); font-weight:600;
+  padding-left:14px; margin-left:14px; border-left:1px solid var(--rule)}
+@media (max-width:700px){ .foot .author{padding-left:0; margin-left:0; border-left:0} }
+
+@media (prefers-reduced-motion: reduce){
+  *{animation-duration:.001ms !important; transition-duration:.001ms !important}
+}
+</style>
+<style>
+/* Normalizacion minima: al publicarse como artefacto esto lo aportaba el
+   contenedor de Claude, y fuera de ahi hay que declararlo. */
+img{max-width:100%}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <div class="brand" data-t="brand">Un código, <span>muchos destinos</span></div>
+    <div class="ctrl">
+      <button id="lang" title="English / Español">🇬🇧 English</button>
+      <button id="narrate" aria-pressed="false" title="Narración por voz">🔊 Narrar</button>
+      <button id="voice" title="Cambiar de voz">Voz</button>
+      <button id="rate" title="Velocidad de la voz">Velocidad: lenta</button>
+      <button id="auto" aria-pressed="false" title="Avance automático">▶ Reproducir</button>
+      <button id="prev" title="Anterior">←</button>
+      <button id="next" title="Siguiente">→</button>
+    </div>
+  </div>
+
+  <div class="rail" id="rail" role="tablist" aria-label="Escenas"></div>
+
+  <!-- ===== 1 ===== -->
+  <section class="scene" data-scene="0">
+    <div data-col="0">
+      <p class="eyebrow step">El punto de partida</p>
+      <h1 class="step">Para comparar empleos entre países, alguien tiene que traducirlos.</h1>
+      <p class="lede step">Cada país registra las ocupaciones con sus propios códigos. Para compararlas
+        hay que traducirlas a una clasificación internacional común, usando tablas oficiales.</p>
+      <p class="step">El detalle que casi nadie mira: <mark>esas tablas no son de una a una</mark>.
+        Un mismo código nacional suele corresponder a varias categorías internacionales, y la tabla
+        no dice cuál elegir. Decide quien procesa los datos, y esa decisión no queda registrada
+        en ninguna parte.</p>
+      <p class="note step">Este trabajo mide, por primera vez, cuánto pesa esa decisión invisible.</p>
+    </div>
+    <div class="stage">
+      <svg id="fanHero" viewBox="0 0 460 330" aria-label="Un código que se abre en dieciocho destinos"></svg>
+      <div class="stage-cap" data-t="cap0">Código censal 9000 · Supervisores de transporte</div>
+    </div>
+  </section>
+
+  <!-- ===== 2 ===== -->
+  <section class="scene" data-scene="1">
+    <div data-col="1">
+      <p class="eyebrow step">La cadena</p>
+      <h2 class="step">La traducción tiene dos escalones, y los dos pierden información.</h2>
+      <p class="step">La encuesta de hogares de Estados Unidos no registra la clasificación
+        internacional ni la clasificación detallada de ocupaciones. Registra
+        <mark class="ok">los códigos del Censo</mark>, que son un resumen de los otros dos.</p>
+      <p class="step"><b>Escalón 1.</b> El Censo agrupa 840 ocupaciones detalladas en 538 códigos
+        propios antes de publicar. Lo hace por buenas razones: proteger la identidad de los
+        encuestados y evitar categorías con muy poca gente. Pero cuando el dato llega al analista,
+        <mark>ese detalle ya está perdido</mark> y no hay forma de recuperarlo.</p>
+      <p class="step"><b>Escalón 2.</b> La tabla que va de la clasificación detallada a la
+        internacional es de muchos a muchos: 154 de 840 ocupaciones tienen más de un destino.</p>
+      <p class="note step">Al componer los dos escalones, la ambigüedad se multiplica.</p>
+    </div>
+    <div class="stage">
+      <svg id="chain" viewBox="0 0 460 300" aria-label="Diagrama de la cadena de clasificaciones"></svg>
+      <div class="stage-cap" data-t="cap1">Censo 2010 → clasificación detallada → clasificación internacional</div>
+    </div>
+  </section>
+
+  <!-- ===== 3 ===== -->
+  <section class="scene" data-scene="2">
+    <div data-col="2">
+      <p class="eyebrow step">Hallazgo 1 · el tamaño del problema</p>
+      <h2 class="step">Casi la mitad del empleo admite más de un destino.</h2>
+      <p class="step">De cada 100 trabajadores estadounidenses, <mark class="ok">51 caen en un
+        código con un único destino posible</mark>. Los otros <mark>49 no</mark>: su ocupación
+        puede clasificarse legítimamente de varias formas distintas.</p>
+      <p class="step">Elegí un código real y mirá en cuántas categorías internacionales puede terminar.</p>
+      <div class="chips step" id="codeChips" role="group" aria-label="Códigos de ejemplo"></div>
+      <p class="muted step" id="codeDesc" style="font-size:15.5px; min-height:3em"></p>
+    </div>
+    <div class="stage">
+      <svg id="fanPick" viewBox="0 0 460 340" aria-label="Destinos admisibles del código elegido"></svg>
+      <div class="stage-cap" id="fanCap">Destinos admisibles</div>
+    </div>
+  </section>
+
+  <!-- ===== 4 ===== -->
+  <section class="scene" data-scene="3">
+    <div data-col="3">
+      <p class="eyebrow step">Hallazgo 2 · de dónde viene</p>
+      <h2 class="step">Un tercio del problema es doméstico.</h2>
+      <p class="step">La ambigüedad se reparte preguntando algo simple para cada código:
+        <i>si tuviéramos el detalle que el Censo agrupó, ¿se resolvería la duda?</i> Si la
+        respuesta es sí, la culpa es de la agregación doméstica. Si es no, del desajuste entre
+        clasificaciones. No hace falta ninguna elección arbitraria.</p>
+      <p class="step">Lo llamativo es el <mark>16,1%</mark>: ese empleo es ambiguo
+        <b>no</b> por la clasificación internacional, sino porque la propia oficina estadística
+        agrupó ocupaciones antes de publicar sus datos.</p>
+      <p class="note step">Ese detalle perdido lo hereda cualquier traducción hecha desde
+        microdatos públicos, sea cual sea la clasificación de destino.</p>
+    </div>
+    <div class="stage">
+      <div class="bars" id="decomp"></div>
+      <div class="legend">
+        <span data-t="lgOk"><i style="background:var(--resolved)"></i>Sin ambigüedad</span>
+        <span data-t="lgAmb"><i style="background:var(--ambiguous)"></i>Ambiguo</span>
+      </div>
+      <div class="stage-cap" data-t="cap3">Porcentaje del empleo, por origen de la ambigüedad</div>
+    </div>
+  </section>
+
+  <!-- ===== 5 ===== -->
+  <section class="scene" data-scene="4">
+    <div data-col="4">
+      <p class="eyebrow step">Hallazgo 3 · cuánto importa</p>
+      <h2 class="step">La decisión oculta pesa más que el azar estadístico.</h2>
+      <p class="step">Todo estudio serio reporta un margen de error por muestreo. Casi ninguno
+        reporta el margen que introduce la elección de traducción.</p>
+      <p class="step">Movés el control y cambia el nivel de detalle: a 1 dígito hay 9 grandes
+        grupos; a 4, más de 400 categorías finas. Al agrupar, <mark class="ok">el margen de
+        muestreo baja</mark> porque cada grupo tiene más gente. Pero <mark>el de traducción
+        sube</mark>, porque mover un código entre grupos grandes lo desplaza mucho más lejos en
+        la escala salarial.</p>
+      <div class="dial step">
+        <label for="lvl" class="metric-k">Nivel de detalle de la clasificación</label>
+        <input type="range" id="lvl" min="1" max="4" step="1" value="2" aria-describedby="lvlOut">
+        <div class="dial-marks"><span>1 dígito</span><span>2</span><span>3</span><span>4 dígitos</span></div>
+      </div>
+      <div class="readout step" id="lvlOut">
+        <div class="metric"><div class="metric-k">Por traducción</div><div class="metric-v" id="mDef">·</div></div>
+        <div class="metric"><div class="metric-k">Por muestreo</div><div class="metric-v" id="mSam">·</div></div>
+        <div class="metric"><div class="metric-k">Razón</div>
+          <div class="metric-v" id="mRat" style="color:var(--ambiguous)">·</div></div>
+      </div>
+      <p class="note step" id="lvlNote"></p>
+    </div>
+    <div class="stage">
+      <svg id="cross" viewBox="0 0 460 300" aria-label="Las dos incertidumbres según el nivel de detalle"></svg>
+      <div class="legend">
+        <span data-t="lgDef"><i style="background:var(--ambiguous)"></i>Incertidumbre por traducción</span>
+        <span data-t="lgSam"><i style="background:var(--resolved)"></i>Incertidumbre por muestreo</span>
+      </div>
+      <div class="stage-cap" data-t="cap4">Se cruzan: agregar reduce una y amplifica la otra</div>
+    </div>
+  </section>
+
+  <!-- ===== 6 ===== -->
+  <section class="scene" data-scene="5">
+    <div data-col="5">
+      <p class="eyebrow step">Hallazgo 4 · el control que no controla</p>
+      <h2 class="step">Coincidir con las cifras oficiales no valida nada.</h2>
+      <p class="step">El chequeo natural sería: si mi traducción reproduce los totales de empleo
+        que publica el organismo internacional, debe estar bien. El estudio lo puso a prueba.</p>
+      <p class="step">Existe una traducción que reproduce esos totales, así que
+        <mark class="ok">no hay contradicción entre organismos</mark>. Pero de los 89 códigos
+        con varias categorías posibles, la exigencia de cuadrar los totales
+        <mark>no fija ninguno</mark>.</p>
+      <p class="step">Mirá el tablero: los totales quedan verdes una y otra vez, mientras las
+        asignaciones de abajo cambian por completo.</p>
+      <p class="note step">Dos analistas pueden coincidir exactamente en las cifras publicadas
+        y estar usando traducciones distintas en casi todos los códigos ambiguos.</p>
+    </div>
+    <div class="stage">
+      <svg id="lock" viewBox="0 0 460 300" aria-label="Los totales cuadran mientras las asignaciones cambian"></svg>
+      <div class="stage-cap" id="lockCap" data-t="cap5">Totales por grupo · asignaciones individuales</div>
+    </div>
+  </section>
+
+  <!-- ===== 7 ===== -->
+  <section class="scene" data-scene="6">
+    <div data-col="6">
+      <p class="eyebrow step">Qué hacer</p>
+      <h2 class="step">La mitad del problema son ocho códigos.</h2>
+      <p class="step">La buena noticia del estudio: la incertidumbre no está repartida en mil
+        pedacitos. <mark>Ocho ocupaciones grandes explican la mitad</mark> del rango completo:
+        gerentes generales, desarrolladores de software, personal de limpieza, supervisores de ventas.</p>
+      <p class="step"><b>Publicar</b> qué fracción del empleo quedó en zona ambigua.
+        <b>Documentar</b> el destino elegido de esos pocos códigos grandes.
+        <b>Reportar rangos</b>, no cifras únicas, cuando la elección pueda mover el resultado.</p>
+      <p class="step muted">Y una advertencia práctica: usar la escolaridad que las encuestas ya
+        traen recorta cerca de la mitad de la incertidumbre. La otra mitad no se recorta con
+        ninguna información disponible hoy.</p>
+      <p class="note step">Para un equipo de armonización esto es una lista de prioridades:
+        documentar bien un puñado de códigos grandes rinde más que cualquier otra intervención
+        disponible.</p>
+    </div>
+    <div class="stage">
+      <div class="bars" id="drivers"></div>
+      <div class="stage-cap" data-t="cap6">Aporte de cada código al rango total, en orden</div>
+    </div>
+  </section>
+
+  <!-- ===== 8 ===== -->
+  <section class="scene" data-scene="7">
+    <div data-col="7">
+      <p class="eyebrow step">En síntesis</p>
+      <h2 class="step">Usamos como funciones unas tablas que no lo son.</h2>
+      <p class="step">Un crosswalk no traduce cada código a un destino: ofrece un menú y calla
+        sobre cuál elegir. Ese hueco se llena con una decisión privada, tomada por quien procesa
+        los datos, que no queda escrita en ningún lado y que hasta ahora nadie había medido.</p>
+      <p class="step">Este trabajo la midió tratando la traducción como una variable de decisión
+        y calculando, con optimización exacta, <mark>todo el rango de resultados que un analista
+        honesto podría publicar</mark>. No una simulación: los extremos están verificados.</p>
+      <p class="step muted">Se hizo con Estados Unidos porque es el país con las tablas y los
+        microdatos públicos mejor documentados del mundo. Donde la documentación es peor,
+        el problema no es menor.</p>
+      <p class="closer step">Las cifras no están mal. Vienen con un margen que nadie reportaba,
+        y que se mide con las mismas tablas oficiales que cualquiera puede descargar.</p>
+    </div>
+    <div class="stage">
+      <div class="tiles">
+        <div class="tile">
+          <div class="tile-v">48,8&thinsp;%</div>
+          <div class="tile-k" data-t="t1k">Empleo ambiguo</div>
+          <div class="tile-d" data-t="t1d">Admite más de un destino internacional.</div>
+        </div>
+        <div class="tile">
+          <div class="tile-v">1 de 3</div>
+          <div class="tile-k" data-t="t2k">Origen doméstico</div>
+          <div class="tile-d" data-t="t2d">No lo causa la clasificación internacional.</div>
+        </div>
+        <div class="tile">
+          <div class="tile-v">1,74&thinsp;×</div>
+          <div class="tile-k" data-t="t3k">Frente al azar</div>
+          <div class="tile-d" data-t="t3d">Pesa más que el margen de error muestral.</div>
+        </div>
+        <div class="tile">
+          <div class="tile-v ok">0 de 89</div>
+          <div class="tile-k" data-t="t4k">Poder del control</div>
+          <div class="tile-d" data-t="t4d">Cuadrar los totales no fija ningún código.</div>
+        </div>
+      </div>
+      <div class="stage-cap" data-t="cap7">Los cuatro números del estudio</div>
+    </div>
+  </section>
+
+  <div class="foot">
+    <span data-t="foot1"><b>Lost in Harmonization</b> · Documento de trabajo, 2026</span>
+    <span class="author">Eric Torres Ramírez</span>
+    <span class="sp" data-t="foot2">Datos: encuesta de hogares de EE.&nbsp;UU. 2019 y tablas oficiales de correspondencia</span>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var NS = "http://www.w3.org/2000/svg";
+  function el(n, a){ var e = document.createElementNS(NS, n);
+    for (var k in a) e.setAttribute(k, a[k]); return e; }
+  function css(v){ return getComputedStyle(document.documentElement).getPropertyValue(v).trim(); }
+
+  /* ---------------- datos reales del estudio ---------------- */
+  var CODES = [
+    { id:"9000", n:18, name:"Supervisores de transporte",
+      desc:"Puede terminar en 18 categorías distintas: desde ingenieros navales y controladores aéreos hasta conductores de autobús y recolectores de residuos. Extremos opuestos de la escala salarial.",
+      dest:["Ingenieros navales","Oficiales de cubierta","Pilotos","Controladores aéreos","Inspectores de salud","Auxiliares de vuelo","Conductores de tren","Playeros","Maquinistas","Señaleros","Motociclistas","Taxistas","Conductores de autobús","Camioneros","Gruistas","Autoelevadores","Estibadores","Recolectores"] },
+    { id:"6050", n:14, name:"Trabajadores agrícolas varios",
+      desc:"Mezcla agricultores calificados con peones. La clasificación internacional los separa en grupos distintos, y ninguna asignación puede partir el código en dos.",
+      dest:["Agricultores","Horticultores","Jardineros","Ganaderos","Avicultores","Apicultores","Mixtos","Pescadores","Cazadores","Peones agrícolas","Peones forestales","Peones pesqueros","Recolectores","Operarios"] },
+    { id:"4250", n:5, name:"Mantenimiento de espacios verdes",
+      desc:"Cinco destinos posibles, repartidos entre jardinería calificada, oficios de construcción y limpieza elemental.",
+      dest:["Jardineros","Techadores","Peones de jardín","Barrenderos","Limpiadores"] },
+    { id:"0020", n:2, name:"Gerentes generales",
+      desc:"Solo dos destinos, pero es el código que más aporta al rango total: mueve casi un millón de empleos entre gerencia y comercio.",
+      dest:["Directores generales","Comerciantes"] },
+    { id:"0010", n:1, name:"Directores ejecutivos",
+      desc:"Un único destino admisible. Para la mitad del empleo la traducción no tiene ninguna ambigüedad: el problema no es universal, es masivo.",
+      dest:["Directores ejecutivos"] }
+  ];
+  var LEVELS = {
+    1:{ def:0.0285, sam:0.0124, ratio:2.30, groups:9,
+        note:"Al nivel más agregado, la incertidumbre por traducción es más del doble que la muestral." },
+    2:{ def:0.0311, sam:0.0179, ratio:1.74, groups:40,
+        note:"Este es el nivel que usa la mayoría de las comparaciones entre países. Es también donde la incertidumbre por traducción llega a su máximo." },
+    3:{ def:0.0234, sam:0.0213, ratio:1.10, groups:127,
+        note:"Cerca del cruce: las dos incertidumbres pesan casi lo mismo." },
+    4:{ def:0.0140, sam:0.0233, ratio:0.60, groups:429,
+        note:"Con el máximo detalle la muestral domina. Pero casi ningún trabajo comparado usa este nivel." }
+  };
+  var DECOMP = [
+    { k:"Sin ambigüedad", v:51.2, amb:false },
+    { k:"Solo por el desajuste entre clasificaciones", v:21.1, amb:true },
+    { k:"Solo por la agregación del Censo", v:16.1, amb:true },
+    { k:"Por ambos escalones", v:11.7, amb:true }
+  ];
+  var DRIVERS = [
+    { k:"Gerentes generales", v:12.6 }, { k:"Personal de limpieza", v:10.4 },
+    { k:"Gerentes, otros", v:7.4 }, { k:"Supervisores de ventas", v:4.9 },
+    { k:"Consejeros", v:4.8 }, { k:"Cuidadores personales", v:4.7 },
+    { k:"Almaceneros", v:3.5 }, { k:"Desarrolladores de software", v:3.4 }
+  ];
+  var NARR = [
+    "Imaginemos que dos países quieren comparar cuántos técnicos tiene cada uno. El problema es que cada país anota los oficios con su propio catálogo de códigos, y esos catálogos no coinciden. Para poder comparar, hay que traducir de un catálogo al otro. Esa traducción se hace con tablas oficiales, publicadas por los organismos de estadística. Hasta acá, todo razonable. El detalle que casi nadie mira es que esas tablas no son de una a una. Un mismo código nacional suele aparecer enfrentado a varias categorías internacionales, y la tabla no dice cuál corresponde. Entonces decide una persona: quien está procesando los datos. Elige una, sigue trabajando, y esa elección no queda anotada en ningún lado.",
+
+    "Veamos por qué el problema se agranda. La traducción no es un salto, son dos escalones. Primer escalón: la encuesta de hogares no publica la clasificación detallada de ocupaciones, que tiene ochocientas cuarenta categorías. Publica un resumen propio de quinientas treinta y ocho códigos, porque agrupar protege la confidencialidad de los encuestados y evita categorías con muy poca gente. Es una decisión sensata, pero tiene un costo: el detalle fino ya está perdido cuando el dato llega al analista. Segundo escalón: la tabla que lleva de la clasificación detallada a la internacional es de muchos a muchos. De las ochocientas cuarenta ocupaciones detalladas, ciento cincuenta y cuatro tienen más de un destino posible. Al encadenar los dos escalones, la ambigüedad no se suma: se multiplica.",
+
+    "El primer hallazgo del estudio es simplemente el tamaño del problema. De cada cien trabajadores estadounidenses, cincuenta y uno están en un código que tiene un único destino posible: para ellos la traducción es automática y no hay nada que decidir. Los otros cuarenta y nueve, no. Su ocupación puede clasificarse de varias maneras, todas igualmente válidas según la tabla oficial. El caso más extremo es el código de supervisores de transporte. Ese único código puede terminar en dieciocho categorías internacionales distintas: desde ingenieros navales y controladores aéreos, que están en la parte alta de la escala salarial, hasta recolectores de residuos, que están en la parte baja. No son categorías vecinas que se discuten en el borde: son extremos opuestos.",
+
+    "El segundo hallazgo responde de dónde viene la ambigüedad, y tiene una sorpresa. Se puede repartir sin ninguna elección arbitraria, preguntando algo simple para cada código: si tuviéramos el detalle fino que la oficina censal agrupó, ¿se resolvería la duda? Cuando la respuesta es sí, la ambigüedad la creó la agregación doméstica. Cuando es no, la creó el desajuste entre las dos clasificaciones. El resultado es que un dieciséis por ciento del empleo es ambiguo por la agregación propia del país, no por la clasificación internacional. Es decir: un tercio del problema no tiene nada que ver con comparar países. Está adentro del dato antes de que ninguna clasificación internacional entre en escena, y lo hereda cualquier traducción hecha desde microdatos públicos.",
+
+    "El tercer hallazgo es el que más importa para quien usa estas estadísticas. Todo estudio serio reporta un margen de error, el que viene de haber encuestado una muestra y no a toda la población. Casi ninguno reporta el otro margen, el que viene de haber elegido una traducción entre varias posibles. El estudio los mide a los dos y los compara, moviendo el nivel de detalle de la clasificación. Y aparece algo que va contra la intuición: al agrupar categorías, el margen de muestreo baja, porque cada grupo tiene más gente adentro. Pero el margen por traducción sube, porque mover un código entre grupos grandes lo desplaza mucho más lejos en la escala salarial. Los dos se cruzan. Y en el nivel de detalle que usa la mayoría de las comparaciones entre países, el margen por traducción es casi el doble que el de muestreo.",
+
+    "El cuarto hallazgo es el más incómodo, porque desarma el control de calidad que uno haría por instinto. Si mi traducción reproduce los totales de empleo que publica el organismo internacional, debería estar bien, ¿no? El estudio lo puso a prueba con una computadora que revisó todas las traducciones posibles. Buena noticia primero: existe una traducción que reproduce esos totales, así que no hay contradicción entre organismos. Pero ahora lo importante. De los ochenta y nueve códigos con varias categorías posibles, exigir que los totales cuadren no fija ninguno. Casi cualquier traducción reproduce los totales igual de bien. Es decir: dos analistas pueden coincidir exactamente en las cifras publicadas y estar usando traducciones distintas en casi todos los códigos ambiguos, con premios salariales por ocupación completamente distintos. Coincidir en los agregados no prueba nada sobre el nivel donde se hace el análisis.",
+
+    "Cerremos con la buena noticia, que es práctica. La incertidumbre no está repartida en mil pedacitos imposibles de atacar. Está concentrada: ocho ocupaciones grandes explican la mitad del rango completo. Gerentes generales, personal de limpieza, desarrolladores de software, supervisores de ventas. Son códigos con mucha gente adentro que oscilan entre categorías muy distintas. Eso convierte el problema en una lista de tareas corta. Documentar bien a dónde va ese puñado de códigos elimina la mitad de la incertidumbre. Y usar la escolaridad que las encuestas ya traen, para descartar destinos incompatibles con el nivel de calificación del trabajador típico de cada código, recorta otro tanto. La otra mitad, eso sí, no se recorta con ninguna información disponible hoy.",
+
+    "En síntesis: usamos como funciones unas tablas que no lo son. Un crosswalk no traduce cada código a un destino, sino que ofrece un menú y calla sobre cuál elegir. Ese hueco se llena con una decisión privada que no queda escrita en ningún lado. Este trabajo la midió tratando la traducción como una variable de decisión, y calculando el rango completo de resultados que un analista honesto podría publicar. Cuatro números resumen el hallazgo. Casi la mitad del empleo es ambiguo. Un tercio de esa ambigüedad es doméstica. En el nivel que usan las comparaciones entre países, pesa casi el doble que el margen de muestreo. Y cuadrar los totales oficiales no fija ninguno de los ochenta y nueve códigos ambiguos. Las cifras no están mal: vienen con un margen que nadie reportaba, y que se mide con las mismas tablas oficiales que cualquiera puede descargar."
+  ];
+
+
+  /* ---------------- ingles ---------------- */
+  /* El castellano no se duplica aca: se captura del propio DOM al arrancar
+     (COL.es) y de las variables de arriba. Solo se escribe el ingles. */
+  var CODES_ES = CODES, LEVELS_ES = LEVELS, DECOMP_ES = DECOMP,
+      DRIVERS_ES = DRIVERS, NARR_ES = NARR;
+
+  var CODES_EN = [
+    { id:"9000", n:18, name:"Transportation supervisors",
+      desc:"It can end up in 18 different categories: from ship engineers and air traffic controllers to bus drivers and refuse collectors. Opposite ends of the wage scale.",
+      dest:["Ship engineers","Deck officers","Pilots","Air traffic control","Health inspectors","Flight attendants","Train drivers","Fuel attendants","Locomotive operators","Signallers","Motorcycle couriers","Taxi drivers","Bus drivers","Truck drivers","Crane operators","Forklift operators","Dockers","Refuse collectors"] },
+    { id:"6050", n:14, name:"Miscellaneous agricultural workers",
+      desc:"It mixes skilled farmers with farmhands. The international classification splits them into separate groups, and no assignment can cut the code in two.",
+      dest:["Crop farmers","Gardeners","Groundskeepers","Livestock farmers","Poultry producers","Beekeepers","Mixed farmers","Fishery workers","Hunters","Farm labourers","Forestry labourers","Fishery labourers","Gatherers","Machine operators"] },
+    { id:"4250", n:5, name:"Grounds maintenance workers",
+      desc:"Five possible destinations, split across skilled gardening, building trades and elementary cleaning.",
+      dest:["Gardeners","Roofers","Garden labourers","Street sweepers","Cleaners"] },
+    { id:"0020", n:2, name:"General managers",
+      desc:"Only two destinations, yet it is the code contributing most to the total range: it moves almost a million jobs between management and retail.",
+      dest:["Managing directors","Shop managers"] },
+    { id:"0010", n:1, name:"Chief executives",
+      desc:"A single admissible destination. For half of employment the translation carries no ambiguity at all: the problem is not universal, it is just very large.",
+      dest:["Chief executives"] }
+  ];
+  var LEVELS_EN = {
+    1:{ def:0.0285, sam:0.0124, ratio:2.30, groups:9,
+        note:"At the most aggregated level, translation uncertainty is more than twice the sampling one." },
+    2:{ def:0.0311, sam:0.0179, ratio:1.74, groups:40,
+        note:"This is the level most cross-country comparisons use. It is also where translation uncertainty peaks." },
+    3:{ def:0.0234, sam:0.0213, ratio:1.10, groups:127,
+        note:"Close to the crossing: the two uncertainties weigh almost the same." },
+    4:{ def:0.0140, sam:0.0233, ratio:0.60, groups:429,
+        note:"At full detail, sampling dominates. But almost no comparative work uses this level." }
+  };
+  var DECOMP_EN = [
+    { k:"No ambiguity", v:51.2, amb:false },
+    { k:"Classification mismatch only", v:21.1, amb:true },
+    { k:"Census aggregation only", v:16.1, amb:true },
+    { k:"Both links", v:11.7, amb:true }
+  ];
+  var DRIVERS_EN = [
+    { k:"General managers", v:12.6 }, { k:"Cleaning staff", v:10.4 },
+    { k:"Managers, other", v:7.4 }, { k:"Sales supervisors", v:4.9 },
+    { k:"Counsellors", v:4.8 }, { k:"Personal care aides", v:4.7 },
+    { k:"Stock clerks", v:3.5 }, { k:"Software developers", v:3.4 }
+  ];
+  var NARR_EN = [
+    "Suppose two countries want to compare how many technicians each of them has. The trouble is that every country records jobs with its own catalogue of codes, and those catalogues do not match. To compare them, you have to translate from one catalogue into the other. That translation is done with official tables, published by statistical agencies. So far, all reasonable. The detail almost nobody looks at is that those tables are not one to one. A single national code is often set against several international categories, and the table does not say which one applies. So a person decides: whoever is processing the data. They pick one, carry on working, and that choice is written down nowhere.",
+
+    "Let us see why the problem grows. The translation is not one jump, it is two steps. First step: the household survey does not publish the detailed occupation classification, which has eight hundred and forty categories. It publishes a summary of its own, five hundred and thirty eight codes, because pooling protects the confidentiality of respondents and avoids categories with very few people. It is a sensible decision, but it has a cost: the fine detail is already lost by the time the data reaches the analyst. Second step: the table running from the detailed classification to the international one is many to many. Of the eight hundred and forty detailed occupations, one hundred and fifty four have more than one possible destination. Chaining the two steps, ambiguity does not add up: it multiplies.",
+
+    "The first finding of the study is simply the size of the problem. Out of every hundred American workers, fifty one are in a code with a single possible destination: for them the translation is automatic and there is nothing to decide. The other forty nine are not. Their occupation can be classified in several ways, all equally valid according to the official table. The most extreme case is the code for transportation supervisors. That single code can end up in eighteen different international categories: from ship engineers and air traffic controllers, who sit at the top of the wage scale, down to refuse collectors, who sit at the bottom. These are not neighbouring categories argued over at the margin: they are opposite extremes.",
+
+    "The second finding answers where the ambiguity comes from, and it holds a surprise. It can be split without any arbitrary choice, by asking something simple for each code: if we had the fine detail the census office pooled, would the doubt be resolved? When the answer is yes, domestic aggregation created the ambiguity. When it is no, the mismatch between the two classifications did. The result is that sixteen per cent of employment is ambiguous because of the country's own aggregation, not because of the international classification. In other words: a third of the problem has nothing to do with comparing countries. It is inside the data before any international classification enters the scene, and it is inherited by any translation built from public microdata.",
+
+    "The third finding matters most to whoever uses these statistics. Every serious study reports a margin of error, the one that comes from having surveyed a sample rather than the whole population. Almost none reports the other margin, the one that comes from having picked one translation among several. The study measures both and compares them, moving the level of detail of the classification. And something counterintuitive appears: pooling categories makes the sampling margin fall, because each group holds more people. But the translation margin rises, because moving a code between large groups displaces it much further along the wage scale. The two cross. And at the level of detail most cross-country comparisons use, the translation margin is almost twice the sampling one.",
+
+    "The fourth finding is the most uncomfortable, because it dismantles the quality check anyone would run on instinct. If my translation reproduces the employment totals the international agency publishes, it must be right, no? The study put that to the test with a computer that searched every possible translation. Good news first: a translation reproducing those totals does exist, so there is no contradiction between agencies. But now the important part. Of the eighty nine codes with several possible categories, requiring the totals to match pins down none of them. Almost any translation reproduces the totals equally well. That is: two analysts can agree exactly on the published figures while using different translations in almost every ambiguous code, with completely different occupational wage premia. Agreeing on the aggregates proves nothing about the level where the analysis is done.",
+
+    "Let us close with the good news, which is practical. The uncertainty is not scattered across a thousand tiny pieces impossible to attack. It is concentrated: eight large occupations explain half of the whole range. General managers, cleaning staff, software developers, sales supervisors. These are codes with many people inside that swing between very different categories. That turns the problem into a short to-do list. Documenting properly where that handful of codes goes removes half the uncertainty. And using the schooling data surveys already carry, to rule out destinations incompatible with the skill level of each code's typical worker, trims a good deal more. The other half, though, is not trimmed by any information available today.",
+
+    "In short: we use as functions some tables that are not functions. A crosswalk does not translate each code into a destination, it offers a menu and stays silent about which item to choose. That gap is filled by a private decision written down nowhere. This work measured it by treating the translation as a decision variable, and computing the whole range of results an honest analyst could publish. Four numbers sum up the finding. Almost half of employment is ambiguous. A third of that ambiguity is domestic. At the level cross-country comparisons use, it weighs almost twice the sampling margin. And matching the official totals pins down none of the eighty nine ambiguous codes. The figures are not wrong: they come with a margin nobody was reporting, and it can be measured with the same official tables anyone can download."
+  ];
+
+  /* Columnas de texto de cada escena. Se conservan los id, que el resto del
+     codigo usa para encontrar los controles interactivos. */
+  var COL_EN = [
+`<p class="eyebrow step">The starting point</p>
+      <h1 class="step">To compare jobs across countries, someone has to translate them.</h1>
+      <p class="lede step">Every country records occupations with its own codes. To compare them,
+        those codes must be translated into a shared international classification, using
+        official tables.</p>
+      <p class="step">The detail almost nobody looks at: <mark>those tables are not one to
+        one</mark>. A single national code often corresponds to several international
+        categories, and the table does not say which one to pick. Whoever processes the data
+        decides, and that decision is recorded nowhere.</p>
+      <p class="note step">This study measures, for the first time, how much that invisible
+        decision weighs.</p>`,
+
+`<p class="eyebrow step">The chain</p>
+      <h2 class="step">The translation has two links, and both lose information.</h2>
+      <p class="step">The US household survey records neither the international classification
+        nor the detailed occupation list. It records <mark class="ok">the Census codes</mark>,
+        which are a summary of the other two.</p>
+      <p class="step"><b>Link 1.</b> The Census pools 840 detailed occupations into 538 codes of
+        its own before publishing. It does so for good reasons: protecting respondents'
+        confidentiality and avoiding categories with very few people. But by the time the data
+        reaches the analyst, <mark>that detail is already lost</mark> and cannot be recovered.</p>
+      <p class="step"><b>Link 2.</b> The table from the detailed classification to the
+        international one is many to many: 154 of 840 occupations have more than one
+        destination.</p>
+      <p class="note step">Composing the two links multiplies the ambiguity.</p>`,
+
+`<p class="eyebrow step">Finding 1 · the size of the problem</p>
+      <h2 class="step">Almost half of employment admits more than one destination.</h2>
+      <p class="step">Out of every 100 US workers, <mark class="ok">51 fall in a code with a
+        single possible destination</mark>. The other <mark>49 do not</mark>: their occupation
+        can legitimately be classified in several different ways.</p>
+      <p class="step">Pick a real code and see how many international categories it can end up
+        in.</p>
+      <div class="chips step" id="codeChips" role="group" aria-label="Sample codes"></div>
+      <p class="muted step" id="codeDesc" style="font-size:15.5px; min-height:3.4em"></p>`,
+
+`<p class="eyebrow step">Finding 2 · where it comes from</p>
+      <h2 class="step">A third of the problem is domestic.</h2>
+      <p class="step">The ambiguity can be split by asking something simple of each code:
+        <i>if we had the detail the Census pooled, would the doubt be resolved?</i> If yes,
+        domestic aggregation is to blame. If no, the mismatch between classifications is. No
+        arbitrary choice is needed.</p>
+      <p class="step">The striking figure is <mark>16.1%</mark>: that employment is ambiguous
+        <b>not</b> because of the international classification, but because the statistical
+        office itself pooled occupations before publishing its data.</p>
+      <p class="note step">That lost detail is inherited by any translation built from public
+        microdata, whatever the target classification.</p>`,
+
+`<p class="eyebrow step">Finding 3 · how much it matters</p>
+      <h2 class="step">The hidden decision weighs more than statistical noise.</h2>
+      <p class="step">Every serious study reports a sampling margin of error. Almost none
+        reports the margin introduced by the choice of translation.</p>
+      <p class="step">Move the control and the level of detail changes: at 1 digit there are 9
+        major groups; at 4, more than 400 fine categories. Pooling makes <mark class="ok">the
+        sampling margin fall</mark> because each group holds more people. But <mark>the
+        translation margin rises</mark>, because moving a code between large groups displaces it
+        much further along the wage scale.</p>
+      <div class="dial step">
+        <label for="lvl" class="metric-k">Classification level of detail</label>
+        <input type="range" id="lvl" min="1" max="4" step="1" value="2" aria-describedby="lvlOut">
+        <div class="dial-marks"><span>1 digit</span><span>2</span><span>3</span><span>4 digits</span></div>
+      </div>
+      <div class="readout step" id="lvlOut">
+        <div class="metric"><div class="metric-k">Translation</div><div class="metric-v" id="mDef">·</div></div>
+        <div class="metric"><div class="metric-k">Sampling</div><div class="metric-v" id="mSam">·</div></div>
+        <div class="metric"><div class="metric-k">Ratio</div>
+          <div class="metric-v" id="mRat" style="color:var(--ambiguous)">·</div></div>
+      </div>
+      <p class="note step" id="lvlNote"></p>`,
+
+`<p class="eyebrow step">Finding 4 · the check that does not check</p>
+      <h2 class="step">Matching the official figures validates nothing.</h2>
+      <p class="step">The natural check would be: if my translation reproduces the employment
+        totals published by the international agency, it must be right. The study put that to
+        the test.</p>
+      <p class="step">A translation reproducing those totals does exist, so <mark class="ok">there
+        is no contradiction between agencies</mark>. But of the 89 codes with several possible
+        categories, requiring the totals to match <mark>pins down none</mark>.</p>
+      <p class="step">Watch the board: the totals turn green again and again while the
+        assignments below change completely.</p>
+      <p class="note step">Two analysts can match the published figures exactly and be using
+        different translations in almost every ambiguous code.</p>`,
+
+`<p class="eyebrow step">What to do</p>
+      <h2 class="step">Half the problem is eight codes.</h2>
+      <p class="step">The good news: uncertainty is not spread across a thousand tiny pieces.
+        <mark>Eight large occupations explain half</mark> of the whole range: general managers,
+        cleaning staff, software developers, sales supervisors.</p>
+      <p class="step"><b>Publish</b> what share of employment fell in the ambiguous zone.
+        <b>Document</b> the chosen destination of those few large codes. <b>Report ranges</b>,
+        not single figures, when the choice can move the result.</p>
+      <p class="step muted">And a practical warning: using the schooling data surveys already
+        carry trims about half the uncertainty. The other half is not trimmed by any information
+        available today.</p>
+      <p class="note step">For a harmonization team this is a priority list: documenting a
+        handful of large codes pays off more than any other available intervention.</p>`,
+
+`<p class="eyebrow step">In short</p>
+      <h2 class="step">We use as functions tables that are not functions.</h2>
+      <p class="step">A crosswalk does not translate each code into a destination: it offers a
+        menu and stays silent about which item to choose. That gap is filled by a private
+        decision, made by whoever processes the data, written down nowhere, and until now never
+        measured.</p>
+      <p class="step">This study measured it by treating the translation as a decision variable
+        and computing, by exact optimization, <mark>the whole range of results an honest analyst
+        could publish</mark>. Not a simulation: the extremes are verified.</p>
+      <p class="step muted">It was done with the United States because it is the country with the
+        best documented tables and public microdata in the world. Where documentation is worse,
+        the problem is not smaller.</p>
+      <p class="closer step">The figures are not wrong. They come with a margin nobody was
+        reporting, and it can be measured with the same official tables anyone can download.</p>`
+  ];
+
+  /* Etiquetas sueltas: controles, pies de figura, leyendas y fichas. */
+  var TXT = {
+    es:{ btn:"🇬🇧 English", narrate:"🔊 Narrar", narrating:"🔊 Narrando", voice:"Voz",
+         speed:"Velocidad: ", rates:["lenta","normal","rápida"], play:"▶ Reproducir",
+         pause:"❚❚ Pausar", of:" de ", scene:"Escena ", scenes:"Escenas",
+         tNarr:"Narración por voz", tVoice:"Cambiar de voz", tRate:"Velocidad de la voz",
+         tAuto:"Avance automático", tPrev:"Anterior", tNext:"Siguiente",
+         vGood:" · voz de red, buena calidad", vBasic:" · voz compacta del sistema",
+         vHint:" · clic para cambiar; las marcadas ✦ suenan mejor",
+         dest1:"DESTINO", destN:"DESTINOS", cOcc:"ocupaciones detalladas",
+         cCen:"códigos del Censo", cInt:"categorías internacionales",
+         dig1:" dígito", digN:" díg.", okFit:"cuadra", codeCap:"Código ",
+         docTitle:"Un código, muchos destinos" },
+    en:{ btn:"🇪🇸 Español", narrate:"🔊 Narrate", narrating:"🔊 Narrating", voice:"Voice",
+         speed:"Speed: ", rates:["slow","normal","fast"], play:"▶ Play",
+         pause:"❚❚ Pause", of:" of ", scene:"Scene ", scenes:"Scenes",
+         tNarr:"Voice narration", tVoice:"Change voice", tRate:"Voice speed",
+         tAuto:"Auto-advance", tPrev:"Previous", tNext:"Next",
+         vGood:" · network voice, good quality", vBasic:" · compact system voice",
+         vHint:" · click to change; the ones marked ✦ sound better",
+         dest1:"DESTINATION", destN:"DESTINATIONS", cOcc:"detailed occupations",
+         cCen:"Census codes", cInt:"international categories",
+         dig1:" digit", digN:" dig.", okFit:"matches", codeCap:"Code ",
+         docTitle:"One code, many destinations",
+         brand:'One code, <span>many destinations</span>',
+         cap0:"Census code 9000 · Transportation supervisors",
+         cap1:"2010 Census → detailed classification → international classification",
+         lgOk:'<i style="background:var(--resolved)"></i>Unambiguous',
+         lgAmb:'<i style="background:var(--ambiguous)"></i>Ambiguous',
+         cap3:"Share of employment, by origin of the ambiguity",
+         lgDef:'<i style="background:var(--ambiguous)"></i>Translation uncertainty',
+         lgSam:'<i style="background:var(--resolved)"></i>Sampling uncertainty',
+         cap4:"They cross: aggregating shrinks one and amplifies the other",
+         cap5:"Group totals · individual assignments",
+         cap6:"Each code's contribution to the total range, in order",
+         cap7:"The four numbers of the study",
+         t1k:"Ambiguous employment", t1d:"Admits more than one international destination.",
+         t2k:"Domestic origin", t2d:"Not caused by the international classification.",
+         t3k:"Versus chance", t3d:"Weighs more than the sampling margin of error.",
+         t4k:"Power of the check", t4d:"Matching the totals pins down no code.",
+         foot1:"<b>Lost in Harmonization</b> · Working paper, 2026",
+         foot2:"Data: 2019 US household survey and official crosswalk tables" }
+  };
+  var LANG = "es";
+  function tr(k){ return TXT[LANG][k] || TXT.es[k]; }
+  /* El separador decimal cambia con el idioma. */
+  function dec(s){ return LANG === "es" ? String(s).replace(".", ",") : String(s); }
+
+  /* ---------------- escenas ---------------- */
+  var scenes = [].slice.call(document.querySelectorAll(".scene"));
+  var rail = document.getElementById("rail");
+  var cur = -1, autoTimer = null;
+
+  scenes.forEach(function(_, i){
+    var b = document.createElement("b");
+    b.setAttribute("role","tab"); b.setAttribute("tabindex","0");
+    b.setAttribute("aria-label", tr("scene") + (i+1));
+    b.addEventListener("click", function(){ go(i); });
+    b.addEventListener("keydown", function(e){
+      if (e.key === "Enter" || e.key === " "){ e.preventDefault(); go(i); } });
+    rail.appendChild(b);
+  });
+
+  /* pace: multiplicador de todos los retardos de animacion. Se recalcula en
+     cada escena para que el dibujo acompanie a la voz en vez de adelantarsele.
+     Estimacion: una voz en espanol dice ~14 caracteres por segundo a rate 1. */
+  var pace = 1.15;
+  function computePace(i){
+    var steps = scenes[i].querySelectorAll(".step").length || 1;
+    if (!narrateOn){ pace = 1.15; return; }
+    var chars = (NARR[i] || "").length;
+    var dur = (chars / (14 * RATES[rateIx].v)) * 1000 + steps * 420;  // + pausas entre frases
+    var ideal = (dur * 0.62) / steps;          // repartir los reveals en el tramo hablado
+    pace = Math.max(0.8, Math.min(4.5, ideal / 95));
+  }
+
+  function revealSteps(sc){
+    var steps = sc.querySelectorAll(".step");
+    steps.forEach(function(s, i){
+      s.removeAttribute("data-in");
+      setTimeout(function(){ s.setAttribute("data-in","1"); },
+        reduce ? 0 : (90 + i*95) * pace);
+    });
+  }
+
+  var swapping = false;
+  function go(i){
+    if (i < 0 || i >= scenes.length || i === cur || swapping) return;
+    var from = cur;
+    cur = i;
+    advanceGuard = -1;          // esta escena vuelve a poder avanzar una vez
+    computePace(i);
+
+    [].slice.call(rail.children).forEach(function(b, j){
+      b.setAttribute("data-on", j <= i ? "1" : "0"); });
+    document.getElementById("prev").disabled = (i === 0);
+    document.getElementById("next").disabled = (i === scenes.length - 1);
+
+    function enter(){
+      var sc = scenes[i];
+      sc.setAttribute("data-live", "1");
+      // dibujar antes de mostrar, para que la escena no entre a medio construir
+      try{ DRAW[i] && DRAW[i](); }
+      catch(err){ console.error('escena ' + i + ':', err); }
+      requestAnimationFrame(function(){
+        requestAnimationFrame(function(){ sc.setAttribute("data-vis", "1"); });
+      });
+      revealSteps(sc);
+      if (narrateOn) speak(NARR[i]);
+      if (autoOn) queueNext();
+      swapping = false;
+    }
+
+    if (from < 0 || reduce){
+      scenes.forEach(function(s, j){
+        if (j !== i){ s.setAttribute("data-live","0"); s.removeAttribute("data-vis"); } });
+      enter();
+      return;
+    }
+
+    swapping = true;
+    var prevSc = scenes[from];
+    prevSc.removeAttribute("data-vis");            // se desvanece
+    setTimeout(function(){
+      prevSc.setAttribute("data-live", "0");
+      enter();
+    }, 300);
+  }
+
+  document.getElementById("prev").addEventListener("click", function(){ stopAuto(); go(cur-1); });
+  document.getElementById("next").addEventListener("click", function(){ stopAuto(); go(cur+1); });
+  addEventListener("keydown", function(e){
+    if (e.target.tagName === "INPUT") return;
+    if (e.key === "ArrowRight"){ stopAuto(); go(cur+1); }
+    if (e.key === "ArrowLeft"){ stopAuto(); go(cur-1); }
+  });
+
+  /* ---------------- voz ---------------- */
+  var narrateOn = false, autoOn = false, synth = window.speechSynthesis;
+  var nb = document.getElementById("narrate"), ab = document.getElementById("auto");
+  if (!synth){ nb.disabled = true; nb.textContent = "🔇 Sin voz"; }
+
+  /* La Web Speech API no expone el genero de la voz, asi que se reconoce por
+     nombre: estos son los nombres masculinos que sirven los sistemas mas usados
+     (macOS, Windows y Chrome) para espanol. Las voces masculinas quedan al
+     frente de la lista y se elige la primera. */
+  var FEM = /(female|femenin|mujer|m[oó]nica|paulina|flo|sandy|shelley|grandma|karen|samantha|victoria|kathy|susan|zoe)/i;
+  var MASC = /(jorge|diego|juan|pablo|ra[uú]l|carlos|enrique|miguel|[aá]lvaro|crist[oó]bal|marcos|andr[eé]s|felipe|jos[eé]|luis|david|mark|guy|alex|daniel|james|ryan|aaron|fred|thomas|george|arthur|eddy|reed|rocko|grandpa|ralph|bruce|junior|tom|male|hombre)/i;
+  /* "Female" contiene "male": si no se descarta primero, toda voz femenina en
+     ingles se clasifica como masculina. */
+  function esMasc(v){ return !FEM.test(v.name) && MASC.test(v.name); }
+  var voices = [], voiceIx = 0;
+  var vb = document.getElementById("voice");
+
+  /* La calidad la pone el sistema, no esta pagina. El unico dato fiable que
+     expone la API es localService: las voces remotas que sirve Chrome (las de
+     Google) son sinteticas de red y suenan mucho mejor que las compactas que
+     el sistema operativo trae de fabrica. Por eso se ordena por CALIDAD
+     primero y por genero despues: una voz masculina compacta se escucha peor
+     que una femenina de red, y al reves no. */
+  function tier(v){
+    if (!v.localService) return 0;                                  // red
+    if (/natural|neural|premium|enhanced|wavenet/i.test(v.name)) return 1;
+    return 2;                                                       // compacta
+  }
+  function loadVoices(){
+    if (!synth) return;
+    var pref = LANG === "es" ? /^es/i : /^en/i;
+    var all = (synth.getVoices() || []).filter(function(v){ return pref.test(v.lang); });
+    if (!all.length) return;
+    all.sort(function(a, b){
+      var d = tier(a) - tier(b); if (d) return d;
+      return (esMasc(b) ? 1 : 0) - (esMasc(a) ? 1 : 0);
+    });
+    voices = all;
+    if (voiceIx >= voices.length) voiceIx = 0;
+    labelVoice();
+  }
+  function labelVoice(){
+    if (!voices.length){ vb.textContent = tr("voice"); vb.disabled = true; return; }
+    vb.disabled = false;
+    var v = voices[voiceIx], q = tier(v);
+    var n = v.name.replace(/\s*\(.*$/, "").replace(/\s+English\b/i, "");
+    if (n.length > 19) n = n.slice(0, 18) + "…";
+    vb.textContent = tr("voice") + ": " + n + (q < 2 ? " ✦" : "") +
+      (esMasc(v) ? "" : " ♀");
+    vb.title = v.name + " · " + v.lang + (q < 2 ? tr("vGood") : tr("vBasic")) +
+      " · " + (voiceIx + 1) + tr("of") + voices.length + tr("vHint");
+  }
+  vb.addEventListener("click", function(){
+    if (!voices.length) return;
+    voiceIx = (voiceIx + 1) % voices.length;
+    labelVoice();
+    if (narrateOn) speak(NARR[cur]);
+  });
+
+  function pickVoice(){
+    if (!voices.length) loadVoices();
+    return voices[voiceIx] || null;
+  }
+  /* Velocidad: por defecto lenta. La sintesis del navegador a rate 1 resulta
+     apurada para un texto explicativo, sobre todo con voces en espanol. */
+  var RATES = [{ v:0.78 }, { v:0.9 }, { v:1.05 }];
+  var rateIx = 0;
+  var rb = document.getElementById("rate");
+  rb.addEventListener("click", function(){
+    rateIx = (rateIx + 1) % RATES.length;
+    rb.textContent = tr("speed") + tr("rates")[rateIx];
+    if (narrateOn) speak(NARR[cur]);          // reinicia la escena a la nueva velocidad
+  });
+
+  /* Avance unico por escena. Lo pueden disparar dos fuentes (el fin de la
+     narracion o el reloj de seguridad); la guardia asegura que solo la primera
+     cuente, y que ninguna escena avance dos veces. */
+  var advanceGuard = -1;
+  function advanceFrom(sceneIx){
+    if (!autoOn || advanceGuard === sceneIx) return;
+    advanceGuard = sceneIx;
+    if (sceneIx < scenes.length - 1) go(sceneIx + 1); else stopAuto();
+  }
+  function estimateMs(text){
+    var frases = (text.match(/[.:]/g) || []).length + 1;
+    return (text.length / (14 * RATES[rateIx].v)) * 1000 + frases * 420;
+  }
+
+  /* Se narra frase por frase, con una pausa breve entre ellas. El contador
+     `gen` invalida las cadenas de escenas anteriores: synth.cancel() dispara
+     onend/onerror de lo que estaba sonando, y sin esta guardia esas cadenas
+     viejas seguirian avanzando en paralelo con la nueva. */
+  var gen = 0;
+  function speak(text){
+    gen++;
+    if (!synth || !narrateOn) return;
+    var my = gen, sceneIx = cur;
+    try{ synth.cancel(); }catch(e){}
+    var parts = (text.match(/[^.:]+[.:]?/g) || [text])
+      .map(function(s){ return s.trim(); })
+      .filter(function(s){ return s.length; });
+    var i = 0;
+    function nextPart(){
+      if (my !== gen || !narrateOn) return;      // cadena obsoleta: se abandona
+      if (i >= parts.length){ advanceFrom(sceneIx); return; }
+      try{
+        var u = new SpeechSynthesisUtterance(parts[i++]);
+        u.lang = LANG === "es" ? "es-ES" : "en-US"; u.rate = RATES[rateIx].v; u.pitch = 1;
+        var v = pickVoice(); if (v) u.voice = v;
+        u.onend = function(){ if (my === gen) setTimeout(nextPart, 420); };
+        u.onerror = function(){ if (my === gen) setTimeout(nextPart, 80); };
+        synth.speak(u);
+      }catch(err){ advanceFrom(sceneIx); }
+    }
+    setTimeout(nextPart, 140);   // deja que cancel() termine de vaciar la cola
+  }
+  nb.addEventListener("click", function(){
+    narrateOn = !narrateOn;
+    nb.setAttribute("aria-pressed", String(narrateOn));
+    nb.textContent = narrateOn ? tr("narrating") : tr("narrate");
+    if (narrateOn) speak(NARR[cur]);
+    else { gen++; if (synth) synth.cancel(); }
+    if (autoOn) queueNext();     // el reloj se recalcula para el modo nuevo
+  });
+
+  /* Reloj de seguridad: si la voz falla, se corta o el navegador nunca emite
+     onend (pasa en Chrome con utterances largas), la escena avanza igual. */
+  function queueNext(){
+    clearTimeout(autoTimer);
+    var sceneIx = cur;
+    var ms = (narrateOn && synth) ? estimateMs(NARR[sceneIx]) + 3000 : 15000;
+    autoTimer = setTimeout(function(){ advanceFrom(sceneIx); }, ms);
+  }
+  function stopAuto(){
+    autoOn = false; clearTimeout(autoTimer);
+    ab.setAttribute("aria-pressed","false"); ab.textContent = tr("play");
+  }
+  ab.addEventListener("click", function(){
+    autoOn = !autoOn;
+    ab.setAttribute("aria-pressed", String(autoOn));
+    ab.textContent = autoOn ? tr("pause") : tr("play");
+    if (autoOn){
+      if (cur === scenes.length - 1){ go(0); }
+      else { advanceGuard = -1; if (narrateOn) speak(NARR[cur]); queueNext(); }
+    } else { clearTimeout(autoTimer); if (synth) synth.cancel(); }
+  });
+
+  /* ---------------- dibujo ---------------- */
+  function fan(svgId, code, capId){
+    var svg = document.getElementById(svgId);
+    svg.textContent = "";
+    var W = 460, H = svg.id === "fanHero" ? 330 : 340;
+    var x0 = 74, y0 = H/2, xd = 330;
+    var n = code.n, amb = n > 1;
+    var col = amb ? css("--ambiguous") : css("--resolved");
+    var span = Math.min(H - 34, n * 15.5);
+    var top = y0 - span/2;
+
+    for (var i = 0; i < n; i++){
+      var y = n === 1 ? y0 : top + (span / (n - 1)) * i;
+      var p = el("path", {
+        d: "M" + x0 + "," + y0 + " C" + (x0+110) + "," + y0 + " " + (xd-96) + "," + y + " " + xd + "," + y,
+        fill: "none", stroke: col, "stroke-width": 1.4, opacity: .55
+      });
+      var L = 420;
+      p.setAttribute("stroke-dasharray", L);
+      p.setAttribute("stroke-dashoffset", reduce ? 0 : L);
+      svg.appendChild(p);
+      if (!reduce) (function(pp, d){ setTimeout(function(){
+        pp.style.transition = "stroke-dashoffset " + (0.62 * pace).toFixed(2) + "s ease-out";
+        pp.setAttribute("stroke-dashoffset", 0); }, d); })(p, (130 + i*44) * pace);
+
+      svg.appendChild(el("circle", { cx: xd, cy: y, r: 3, fill: col }));
+      if (n <= 6 && code.dest && code.dest[i]){
+        var t = el("text", { x: xd + 9, y: y + 3.6, fill: css("--muted"),
+          "font-size": 10.5, "font-family": "Archivo, sans-serif" });
+        t.textContent = code.dest[i]; svg.appendChild(t);
+      }
+    }
+
+    svg.appendChild(el("circle", { cx: x0, cy: y0, r: 21, fill: css("--panel"),
+      stroke: css("--ink"), "stroke-width": 1.6 }));
+    var lab = el("text", { x: x0, y: y0 + 4.5, "text-anchor": "middle",
+      fill: css("--ink"), "font-size": 13, "font-weight": 600,
+      "font-family": "JetBrains Mono, monospace" });
+    lab.textContent = code.id; svg.appendChild(lab);
+
+    var big = el("text", { x: xd + 8, y: 30, fill: col, "font-size": 40,
+      "font-weight": 800, "font-family": "Archivo, sans-serif" });
+    big.textContent = n; svg.appendChild(big);
+    var sub = el("text", { x: xd + 8, y: 46, fill: css("--muted"), "font-size": 10,
+      "font-family": "Archivo, sans-serif", "letter-spacing": "1.2" });
+    sub.textContent = n === 1 ? tr("dest1") : tr("destN"); svg.appendChild(sub);
+
+    if (capId) document.getElementById(capId).textContent =
+      tr("codeCap") + code.id + " · " + code.name;
+  }
+
+  function drawChain(){
+    var svg = document.getElementById("chain"); svg.textContent = "";
+    var cols = [
+      { x: 58,  t: "840", s: tr("cOcc"), c: css("--muted") },
+      { x: 230, t: "538", s: tr("cCen"), c: css("--ambiguous") },
+      { x: 402, t: "438", s: tr("cInt"), c: css("--resolved") }
+    ];
+    cols.forEach(function(c, i){
+      if (i < 2){
+        for (var k = 0; k < 7; k++){
+          var y1 = 118 + k*11, y2 = 118 + (k*11) + (i === 0 ? -18 : 18);
+          var p = el("path", { d:"M"+(c.x+34)+","+y1+" C"+(c.x+80)+","+y1+" "+(cols[i+1].x-80)+","+y2+" "+(cols[i+1].x-34)+","+y2,
+            fill:"none", stroke: i === 0 ? css("--muted") : css("--ambiguous"),
+            "stroke-width":1.1, opacity:.4 });
+          svg.appendChild(p);
+          if (!reduce){ p.setAttribute("stroke-dasharray", 260);
+            p.setAttribute("stroke-dashoffset", 260);
+            (function(pp,d){ setTimeout(function(){
+              pp.style.transition="stroke-dashoffset " + (0.7 * pace).toFixed(2) + "s ease-out";
+              pp.setAttribute("stroke-dashoffset",0); }, d); })(p, (200 + i*380 + k*40) * pace); }
+        }
+      }
+      svg.appendChild(el("rect", { x:c.x-34, y:112, width:68, height:76, rx:9,
+        fill: css("--panel"), stroke:c.c, "stroke-width":1.6 }));
+      var n = el("text", { x:c.x, y:152, "text-anchor":"middle", fill:c.c,
+        "font-size":25, "font-weight":800, "font-family":"Archivo, sans-serif" });
+      n.textContent = c.t; svg.appendChild(n);
+      var s = el("text", { x:c.x, y:206, "text-anchor":"middle", fill: css("--muted"),
+        "font-size":10, "font-family":"Archivo, sans-serif" });
+      s.textContent = c.s; svg.appendChild(s);
+      var st = el("text", { x:c.x, y:222, "text-anchor":"middle", fill: css("--muted"),
+        "font-size":10, "font-family":"Archivo, sans-serif" });
+      svg.appendChild(st);
+    });
+    [["ESCALÓN 1 · agrupa", 144], ["ESCALÓN 2 · se abre", 316]].forEach(function(p){
+      var t = el("text", { x:p[1], y:88, "text-anchor":"middle", fill: css("--muted"),
+        "font-size":9.5, "font-weight":700, "letter-spacing":"1.4",
+        "font-family":"Archivo, sans-serif" });
+      t.textContent = p[0]; svg.appendChild(t);
+    });
+  }
+
+  function drawBars(hostId, rows, fmt){
+    var host = document.getElementById(hostId); host.textContent = "";
+    var max = Math.max.apply(null, rows.map(function(r){ return r.v; }));
+    rows.forEach(function(r, i){
+      var row = document.createElement("div"); row.className = "bar-row";
+      var l = document.createElement("div"); l.className = "bar-lab"; l.textContent = r.k;
+      var v = document.createElement("div"); v.className = "bar-val"; v.textContent = fmt(r.v);
+      var tr = document.createElement("div"); tr.className = "bar-track";
+      var fi = document.createElement("div"); fi.className = "bar-fill";
+      fi.style.background = (r.amb === false) ? "var(--resolved)" : "var(--ambiguous)";
+      tr.appendChild(fi); row.appendChild(l); row.appendChild(v); row.appendChild(tr);
+      host.appendChild(row);
+      fi.style.transitionDuration = (0.9 * Math.min(pace, 2)).toFixed(2) + "s";
+      setTimeout(function(){ fi.style.width = (r.v / max * 100) + "%"; },
+        reduce ? 0 : (160 + i*105) * pace);
+    });
+  }
+
+  function drawCross(active){
+    var svg = document.getElementById("cross"); svg.textContent = "";
+    var L = [4,3,2,1], pad = { l:46, r:22, t:22, b:40 }, W = 460, H = 300;
+    var maxV = 0.034;
+    function X(i){ return pad.l + (W - pad.l - pad.r) * (i / (L.length - 1)); }
+    function Y(v){ return H - pad.b - (H - pad.t - pad.b) * (v / maxV); }
+
+    [0, 0.01, 0.02, 0.03].forEach(function(g){
+      svg.appendChild(el("line", { x1:pad.l, y1:Y(g), x2:W-pad.r, y2:Y(g),
+        stroke: css("--rule"), "stroke-width":1 }));
+      var t = el("text", { x:pad.l-8, y:Y(g)+3.5, "text-anchor":"end", fill: css("--muted"),
+        "font-size":9.5, "font-family":"JetBrains Mono, monospace" });
+      t.textContent = g.toFixed(2); svg.appendChild(t);
+    });
+
+    [["def", css("--ambiguous")], ["sam", css("--resolved")]].forEach(function(s){
+      var d = L.map(function(lv, i){ return (i ? "L" : "M") + X(i) + "," + Y(LEVELS[lv][s[0]]); }).join(" ");
+      var p = el("path", { d:d, fill:"none", stroke:s[1], "stroke-width":2.4,
+        "stroke-linejoin":"round", "stroke-linecap":"round" });
+      svg.appendChild(p);
+      if (!reduce){ p.setAttribute("stroke-dasharray", 900);
+        p.setAttribute("stroke-dashoffset", 900);
+        setTimeout(function(){
+          p.style.transition = "stroke-dashoffset " + (1.1 * pace).toFixed(2) + "s ease-out";
+          p.setAttribute("stroke-dashoffset", 0); }, 200 * pace); }
+      L.forEach(function(lv, i){
+        var on = lv === active;
+        svg.appendChild(el("circle", { cx:X(i), cy:Y(LEVELS[lv][s[0]]), r: on ? 6.5 : 4,
+          fill: on ? s[1] : css("--panel"), stroke:s[1], "stroke-width":2 }));
+      });
+    });
+
+    L.forEach(function(lv, i){
+      var t = el("text", { x:X(i), y:H-16, "text-anchor":"middle",
+        fill: lv === active ? css("--ink") : css("--muted"),
+        "font-size":11, "font-weight": lv === active ? 700 : 400,
+        "font-family":"Archivo, sans-serif" });
+      t.textContent = lv + (lv === 1 ? tr("dig1") : tr("digN")); svg.appendChild(t);
+    });
+  }
+
+  function drawLock(){
+    var svg = document.getElementById("lock"); svg.textContent = "";
+    var groups = ["Directivos","Profesionales","Técnicos","Oficinistas","Servicios",
+                  "Agrícolas","Oficios","Operarios","Elementales"];
+    groups.forEach(function(g, i){
+      var y = 30 + i*17;
+      svg.appendChild(el("text", { x:8, y:y+4, fill: css("--muted"), "font-size":9.5,
+        "font-family":"Archivo, sans-serif" })).textContent = g;
+      svg.appendChild(el("rect", { x:96, y:y-6, width:150, height:11, rx:3,
+        fill: css("--resolved-wash"), stroke: css("--resolved"), "stroke-width":1 }));
+      var ok = el("text", { x:254, y:y+4, fill: css("--resolved"), "font-size":11,
+        "font-weight":700, "font-family":"Archivo, sans-serif" });
+      ok.textContent = tr("okFit"); svg.appendChild(ok);
+    });
+    var hdr = el("text", { x:8, y:16, fill: css("--ink"), "font-size":10.5,
+      "font-weight":700, "letter-spacing":"1.2", "font-family":"Archivo, sans-serif" });
+    hdr.textContent = "TOTALES PUBLICADOS"; svg.appendChild(hdr);
+
+    var hdr2 = el("text", { x:312, y:16, fill: css("--ink"), "font-size":10.5,
+      "font-weight":700, "letter-spacing":"1.2", "font-family":"Archivo, sans-serif" });
+    hdr2.textContent = "ASIGNACIONES"; svg.appendChild(hdr2);
+
+    var cells = [];
+    for (var r = 0; r < 9; r++) for (var c = 0; c < 4; c++){
+      var rect = el("rect", { x:312 + c*30, y:24 + r*17, width:25, height:11, rx:3,
+        fill: css("--ambiguous-wash"), stroke: css("--ambiguous"), "stroke-width":1, opacity:.9 });
+      svg.appendChild(rect); cells.push(rect);
+    }
+    if (!reduce){
+      var iv = setInterval(function(){
+        if (!document.body.contains(svg) || scenes[5].getAttribute("data-live") !== "1"){
+          clearInterval(iv); return; }
+        cells.forEach(function(c){ c.setAttribute("opacity", Math.random() < .45 ? .18 : .9); });
+      }, 620 * Math.min(pace, 2));
+    }
+  }
+
+  /* ---------------- interacciones ---------------- */
+  var picked = 0;
+  /* Cambiar de idioma reemplaza el HTML de la columna, asi que los controles
+     se vuelven a crear y a enlazar cada vez. */
+  function buildChips(){
+    var chips = document.getElementById("codeChips");
+    if (!chips) return;
+    chips.textContent = "";
+    CODES.forEach(function(c, i){
+      var b = document.createElement("button");
+      b.className = "chip"; b.textContent = c.id;
+      b.setAttribute("aria-pressed", String(i === picked));
+      b.addEventListener("click", function(){
+        picked = i;
+        [].slice.call(chips.children).forEach(function(x, j){
+          x.setAttribute("aria-pressed", String(j === i)); });
+        fan("fanPick", CODES[i], "fanCap");
+        document.getElementById("codeDesc").textContent = CODES[i].desc;
+      });
+      chips.appendChild(b);
+    });
+  }
+  var lvlVal = 2;
+  function bindDial(){
+    var lvl = document.getElementById("lvl");
+    if (!lvl) return;
+    lvl.value = lvlVal;
+    lvl.addEventListener("input", function(){ lvlVal = +lvl.value; syncLevel(); });
+  }
+  function syncLevel(){
+    var v = lvlVal, d = LEVELS[v];
+    document.getElementById("mDef").textContent = dec(d.def.toFixed(3));
+    document.getElementById("mSam").textContent = dec(d.sam.toFixed(3));
+    document.getElementById("mRat").textContent = dec(d.ratio.toFixed(2)) + "×";
+    document.getElementById("lvlNote").textContent = d.note;
+    drawCross(v);
+  }
+
+  var DRAW = {
+    0: function(){ fan("fanHero", CODES[0]); },
+    1: drawChain,
+    2: function(){ fan("fanPick", CODES[picked], "fanCap");
+        document.getElementById("codeDesc").textContent = CODES[picked].desc; },
+    3: function(){ drawBars("decomp", DECOMP, function(v){ return dec(v.toFixed(1)) + "%"; }); },
+    4: syncLevel,
+    5: drawLock,
+    6: function(){ drawBars("drivers", DRIVERS, function(v){ return dec(v.toFixed(1)) + "%"; }); }
+  };
+
+  /* ---------------- idioma ---------------- */
+  /* El castellano vive en el HTML servido; al arrancar se guarda una copia y a
+     partir de ahi cambiar de idioma es intercambiar innerHTML y punteros. */
+  var cols = [].slice.call(document.querySelectorAll("[data-col]"));
+  var COL_ES = cols.map(function(c){ return c.innerHTML; });
+  var tagged = [].slice.call(document.querySelectorAll("[data-t]"));
+  tagged.forEach(function(e){ TXT.es[e.getAttribute("data-t")] = e.innerHTML; });
+
+  var lb = document.getElementById("lang");
+  function setLang(l){
+    if (l === LANG) return;
+    stopAuto(); gen++; if (synth) synth.cancel();
+    LANG = l;
+    document.documentElement.lang = l;
+    document.title = tr("docTitle");
+    CODES = l === "es" ? CODES_ES : CODES_EN;
+    LEVELS = l === "es" ? LEVELS_ES : LEVELS_EN;
+    DECOMP = l === "es" ? DECOMP_ES : DECOMP_EN;
+    DRIVERS = l === "es" ? DRIVERS_ES : DRIVERS_EN;
+    NARR = l === "es" ? NARR_ES : NARR_EN;
+    cols.forEach(function(c, i){ c.innerHTML = (l === "es" ? COL_ES : COL_EN)[i]; });
+    tagged.forEach(function(e){ e.innerHTML = tr(e.getAttribute("data-t")); });
+    buildChips(); bindDial();
+    lb.textContent = tr("btn");
+    nb.textContent = narrateOn ? tr("narrating") : tr("narrate");
+    nb.title = tr("tNarr");
+    vb.title = tr("tVoice");
+    rb.textContent = tr("speed") + tr("rates")[rateIx]; rb.title = tr("tRate");
+    ab.textContent = autoOn ? tr("pause") : tr("play");
+    ab.title = tr("tAuto");
+    document.getElementById("prev").title = tr("tPrev");
+    document.getElementById("next").title = tr("tNext");
+    rail.setAttribute("aria-label", tr("scenes"));
+    [].slice.call(rail.children).forEach(function(b, i){
+      b.setAttribute("aria-label", tr("scene") + (i + 1)); });
+    loadVoices();
+    var at = cur; cur = -1; go(at);          // se repinta la escena en curso
+  }
+  lb.addEventListener("click", function(){ setLang(LANG === "es" ? "en" : "es"); });
+
+  /* En Chrome las voces llegan de forma asincrona: hay que reintentar. */
+  if (synth){
+    loadVoices();
+    if (synth.onvoiceschanged !== undefined) synth.onvoiceschanged = loadVoices;
+    setTimeout(loadVoices, 300);
+    setTimeout(loadVoices, 1200);
+  }
+  buildChips(); bindDial();
+  go(0);
+})();
+</script>
+</body>
+</html>
