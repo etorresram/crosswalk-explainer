@@ -237,8 +237,9 @@ img{max-width:100%}
         hay que traducirlas a una clasificación internacional común, usando tablas oficiales.</p>
       <p class="step">El detalle que casi nadie mira: <mark>esas tablas no son de una a una</mark>.
         Un mismo código nacional suele corresponder a varias categorías internacionales, y la tabla
-        no dice cuál elegir. Decide quien procesa los datos, y esa decisión no queda registrada
-        en ninguna parte.</p>
+        no dice cuál elegir. Decide quien procesa los datos, y esa decisión casi
+        nunca llega al lector: cuando se documenta, queda en un apéndice, en una nota
+        suelta o dentro del propio código.</p>
       <p class="note step">Este trabajo mide, por primera vez, cuánto pesa esa decisión invisible.</p>
     </div>
     <div class="stage">
@@ -399,8 +400,8 @@ img{max-width:100%}
       <p class="eyebrow step">En síntesis</p>
       <h2 class="step">Usamos como funciones unas tablas que no lo son.</h2>
       <p class="step">Un crosswalk no traduce cada código a un destino: ofrece un menú y calla
-        sobre cuál elegir. Ese hueco se llena con una decisión privada, tomada por quien procesa
-        los datos, que no queda escrita en ningún lado y que hasta ahora nadie había medido.</p>
+        sobre cuál elegir. Ese hueco se llena con una decisión discrecional, tomada por quien procesa
+        los datos, que rara vez llega al lector y que hasta ahora nadie había medido.</p>
       <p class="step">Este trabajo la midió tratando la traducción como una variable de decisión
         y calculando, con optimización exacta, <mark>todo el rango de resultados que un analista
         honesto podría publicar</mark>. No una simulación: los extremos están verificados.</p>
@@ -494,7 +495,7 @@ img{max-width:100%}
     { k:"Almaceneros", v:3.5 }, { k:"Desarrolladores de software", v:3.4 }
   ];
   var NARR = [
-    "Imaginemos que dos países quieren comparar cuántos técnicos tiene cada uno. El problema es que cada país anota los oficios con su propio catálogo de códigos, y esos catálogos no coinciden. Para poder comparar, hay que traducir de un catálogo al otro. Esa traducción se hace con tablas oficiales, publicadas por los organismos de estadística. Hasta acá, todo razonable. El detalle que casi nadie mira es que esas tablas no son de una a una. Un mismo código nacional suele aparecer enfrentado a varias categorías internacionales, y la tabla no dice cuál corresponde. Entonces decide una persona: quien está procesando los datos. Elige una, sigue trabajando, y esa elección no queda anotada en ningún lado.",
+    "Imaginemos que dos países quieren comparar cuántos técnicos tiene cada uno. El problema es que cada país anota los oficios con su propio catálogo de códigos, y esos catálogos no coinciden. Para poder comparar, hay que traducir de un catálogo al otro. Esa traducción se hace con tablas oficiales, publicadas por los organismos de estadística. Hasta acá, todo razonable. El detalle que casi nadie mira es que esas tablas no son de una a una. Un mismo código nacional suele aparecer enfrentado a varias categorías internacionales, y la tabla no dice cuál corresponde. Entonces decide una persona: quien está procesando los datos. Elige una, sigue trabajando, y esa elección casi nunca llega al lector: cuando se anota, queda en un apéndice o dentro del código.",
 
     "Veamos por qué el problema se agranda. La traducción no es un salto, son dos escalones. Primer escalón: la encuesta de hogares no publica la clasificación detallada de ocupaciones, que tiene ochocientas cuarenta categorías. Publica un resumen propio de quinientas treinta y ocho códigos, porque agrupar protege la confidencialidad de los encuestados y evita categorías con muy poca gente. Es una decisión sensata, pero tiene un costo: el detalle fino ya está perdido cuando el dato llega al analista. Segundo escalón: la tabla que lleva de la clasificación detallada a la internacional es de muchos a muchos. De las ochocientas cuarenta ocupaciones detalladas, ciento cincuenta y cuatro tienen más de un destino posible. Al encadenar los dos escalones, la ambigüedad no se suma: se multiplica.",
 
@@ -508,7 +509,7 @@ img{max-width:100%}
 
     "Cerremos con la buena noticia, que es práctica. La incertidumbre no está repartida en mil pedacitos imposibles de atacar. Está concentrada: ocho ocupaciones grandes explican la mitad del rango completo. Gerentes generales, personal de limpieza, desarrolladores de software, supervisores de ventas. Son códigos con mucha gente adentro que oscilan entre categorías muy distintas. Eso convierte el problema en una lista de tareas corta. Documentar bien a dónde va ese puñado de códigos elimina la mitad de la incertidumbre. Y usar la escolaridad que las encuestas ya traen, para descartar destinos incompatibles con el nivel de calificación del trabajador típico de cada código, recorta otro tanto. La otra mitad, eso sí, no se recorta con ninguna información disponible hoy.",
 
-    "En síntesis: usamos como funciones unas tablas que no lo son. Un crosswalk no traduce cada código a un destino, sino que ofrece un menú y calla sobre cuál elegir. Ese hueco se llena con una decisión privada que no queda escrita en ningún lado. Este trabajo la midió tratando la traducción como una variable de decisión, y calculando el rango completo de resultados que un analista honesto podría publicar. Cuatro números resumen el hallazgo. Casi la mitad del empleo es ambiguo. Un tercio de esa ambigüedad es doméstica. En el nivel que usan las comparaciones entre países, pesa casi el doble que el margen de muestreo. Y cuadrar los totales oficiales no fija ninguno de los ochenta y nueve códigos ambiguos. Las cifras no están mal: vienen con un margen que nadie reportaba, y que se mide con las mismas tablas oficiales que cualquiera puede descargar."
+    "En síntesis: usamos como funciones unas tablas que no lo son. Un crosswalk no traduce cada código a un destino, sino que ofrece un menú y calla sobre cuál elegir. Ese hueco se llena con una decisión discrecional que rara vez llega al lector. Este trabajo la midió tratando la traducción como una variable de decisión, y calculando el rango completo de resultados que un analista honesto podría publicar. Cuatro números resumen el hallazgo. Casi la mitad del empleo es ambiguo. Un tercio de esa ambigüedad es doméstica. En el nivel que usan las comparaciones entre países, pesa casi el doble que el margen de muestreo. Y cuadrar los totales oficiales no fija ninguno de los ochenta y nueve códigos ambiguos. Las cifras no están mal: vienen con un margen que nadie reportaba, y que se mide con las mismas tablas oficiales que cualquiera puede descargar."
   ];
 
 
@@ -558,7 +559,7 @@ img{max-width:100%}
     { k:"Stock clerks", v:3.5 }, { k:"Software developers", v:3.4 }
   ];
   var NARR_EN = [
-    "Suppose two countries want to compare how many technicians each of them has. The trouble is that every country records jobs with its own catalogue of codes, and those catalogues do not match. To compare them, you have to translate from one catalogue into the other. That translation is done with official tables, published by statistical agencies. So far, all reasonable. The detail almost nobody looks at is that those tables are not one to one. A single national code is often set against several international categories, and the table does not say which one applies. So a person decides: whoever is processing the data. They pick one, carry on working, and that choice is written down nowhere.",
+    "Suppose two countries want to compare how many technicians each of them has. The trouble is that every country records jobs with its own catalogue of codes, and those catalogues do not match. To compare them, you have to translate from one catalogue into the other. That translation is done with official tables, published by statistical agencies. So far, all reasonable. The detail almost nobody looks at is that those tables are not one to one. A single national code is often set against several international categories, and the table does not say which one applies. So a person decides: whoever is processing the data. They pick one, carry on working, and that choice rarely reaches the reader: when it is written down, it sits in an appendix or inside the code.",
 
     "Let us see why the problem grows. The translation is not one jump, it is two steps. First step: the household survey does not publish the detailed occupation classification, which has eight hundred and forty categories. It publishes a summary of its own, five hundred and thirty eight codes, because pooling protects the confidentiality of respondents and avoids categories with very few people. It is a sensible decision, but it has a cost: the fine detail is already lost by the time the data reaches the analyst. Second step: the table running from the detailed classification to the international one is many to many. Of the eight hundred and forty detailed occupations, one hundred and fifty four have more than one possible destination. Chaining the two steps, ambiguity does not add up: it multiplies.",
 
@@ -572,7 +573,7 @@ img{max-width:100%}
 
     "Let us close with the good news, which is practical. The uncertainty is not scattered across a thousand tiny pieces impossible to attack. It is concentrated: eight large occupations explain half of the whole range. General managers, cleaning staff, software developers, sales supervisors. These are codes with many people inside that swing between very different categories. That turns the problem into a short to-do list. Documenting properly where that handful of codes goes removes half the uncertainty. And using the schooling data surveys already carry, to rule out destinations incompatible with the skill level of each code's typical worker, trims a good deal more. The other half, though, is not trimmed by any information available today.",
 
-    "In short: we use as functions some tables that are not functions. A crosswalk does not translate each code into a destination, it offers a menu and stays silent about which item to choose. That gap is filled by a private decision written down nowhere. This work measured it by treating the translation as a decision variable, and computing the whole range of results an honest analyst could publish. Four numbers sum up the finding. Almost half of employment is ambiguous. A third of that ambiguity is domestic. At the level cross-country comparisons use, it weighs almost twice the sampling margin. And matching the official totals pins down none of the eighty nine ambiguous codes. The figures are not wrong: they come with a margin nobody was reporting, and it can be measured with the same official tables anyone can download."
+    "In short: we use as functions some tables that are not functions. A crosswalk does not translate each code into a destination, it offers a menu and stays silent about which item to choose. That gap is filled by a discretionary decision that rarely reaches the reader. This work measured it by treating the translation as a decision variable, and computing the whole range of results an honest analyst could publish. Four numbers sum up the finding. Almost half of employment is ambiguous. A third of that ambiguity is domestic. At the level cross-country comparisons use, it weighs almost twice the sampling margin. And matching the official totals pins down none of the eighty nine ambiguous codes. The figures are not wrong: they come with a margin nobody was reporting, and it can be measured with the same official tables anyone can download."
   ];
 
   /* Columnas de texto de cada escena. Se conservan los id, que el resto del
@@ -586,7 +587,8 @@ img{max-width:100%}
       <p class="step">The detail almost nobody looks at: <mark>those tables are not one to
         one</mark>. A single national code often corresponds to several international
         categories, and the table does not say which one to pick. Whoever processes the data
-        decides, and that decision is recorded nowhere.</p>
+        decides, and that decision rarely reaches the reader: when it is documented, it
+        lives in an appendix, a loose note or the code itself.</p>
       <p class="note step">This study measures, for the first time, how much that invisible
         decision weighs.</p>`,
 
@@ -679,8 +681,8 @@ img{max-width:100%}
       <h2 class="step">We use as functions tables that are not functions.</h2>
       <p class="step">A crosswalk does not translate each code into a destination: it offers a
         menu and stays silent about which item to choose. That gap is filled by a private
-        decision, made by whoever processes the data, written down nowhere, and until now never
-        measured.</p>
+        decision, made by whoever processes the data, rarely visible to the reader, and
+        until now never measured.</p>
       <p class="step">This study measured it by treating the translation as a decision variable
         and computing, by exact optimization, <mark>the whole range of results an honest analyst
         could publish</mark>. Not a simulation: the extremes are verified.</p>
