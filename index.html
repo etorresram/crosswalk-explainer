@@ -700,7 +700,7 @@ img{max-width:100%}
          tNarr:"Narración por voz", tVoice:"Cambiar de voz", tRate:"Velocidad de la voz",
          tAuto:"Avance automático", tPrev:"Anterior", tNext:"Siguiente",
          vGood:" · voz de red, buena calidad", vBasic:" · voz compacta del sistema",
-         vHint:" · clic para cambiar; las marcadas ✦ suenan mejor",
+         vHint:" · clic para alternar entre las dos mejores del sistema",
          dest1:"DESTINO", destN:"DESTINOS", cOcc:"ocupaciones detalladas",
          cCen:"códigos del Censo", cInt:"categorías internacionales",
          dig1:" dígito", digN:" díg.", okFit:"cuadra", codeCap:"Código ",
@@ -711,7 +711,7 @@ img{max-width:100%}
          tNarr:"Voice narration", tVoice:"Change voice", tRate:"Voice speed",
          tAuto:"Auto-advance", tPrev:"Previous", tNext:"Next",
          vGood:" · network voice, good quality", vBasic:" · compact system voice",
-         vHint:" · click to change; the ones marked ✦ sound better",
+         vHint:" · click to switch between the system's two best",
          dest1:"DESTINATION", destN:"DESTINATIONS", cOcc:"detailed occupations",
          cCen:"Census codes", cInt:"international categories",
          dig1:" digit", digN:" dig.", okFit:"matches", codeCap:"Code ",
@@ -873,7 +873,11 @@ img{max-width:100%}
       var d = tier(a) - tier(b); if (d) return d;
       return (esMasc(b) ? 1 : 0) - (esMasc(a) ? 1 : 0);
     });
-    voices = all;
+    /* Solo las dos mejores. La lista del sistema trae veinte voces por idioma
+       y casi todas son peores que las dos primeras: ofrecerlas todas es
+       obligar a recorrer basura para volver al punto de partida. El orden de
+       arriba ya dejo delante las de mas calidad. */
+    voices = all.slice(0, 2);
     if (voiceIx >= voices.length) voiceIx = 0;
     labelVoice();
   }
